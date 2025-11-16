@@ -14,9 +14,11 @@ def handler(event, context):
     try:
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
+        
         if not incident_id:
             return {
                 'statusCode': 400,
+                'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({
                     'error': 'ID de incidente requerido'
                 })
@@ -25,67 +27,81 @@ def handler(event, context):
         body = event.get("body")
         if isinstance(body, str):
             body = json.loads(body)
-
+        
+        # Obtener departamento del body
+        departamento = body.get("departamento")
+        if not departamento:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json'},
+                'body': json.dumps({
+                    'error': 'Campo departamento requerido'
+                })
+            }
+        
         user = authorize(event)
         if not user:
             return {
                 'statusCode': 403,
+                'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({
                     'error': 'Token inválido'
                 })
             }
-
-        if user["role"] not in ["staff", "admin"]:
+        
+        # Solo admin puede asignar departamentos
+        if user["role"] != "admin":
             return {
                 'statusCode': 403,
+                'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({
-                    'error': 'No autorizado'
+                    'error': 'Solo administradores pueden asignar departamentos'
                 })
             }
-
-        dep = user.get("department")
-        if not dep:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({
-                    'error': 'Tu usuario no tiene departamento'
-                })
-            }
-
-        # update Incidente
+        
+        # Actualizar Incidente
         table_inc.update_item(
             Key={"incident_id": incident_id},
-            UpdateExpression="SET departamento = :d",
-            ExpressionAttributeValues={":d": dep}
+            UpdateExpression="SET departamento = :d, updated_at = :u",
+            ExpressionAttributeValues={
+                ":d": departamento,
+                ":u": datetime.utcnow().isoformat()
+            }
         )
-
-        # log event
+        
+        # Registrar evento
         table_evt.put_item(Item={
             "incident_id": incident_id,
             "timestamp": datetime.utcnow().isoformat(),
             "event_id": str(uuid.uuid4()),
             "tipo_evento": "asignacion",
-            "detalle": {"departamento": dep}
+            "detalle": {
+                "departamento": departamento,
+                "asignado_por": user["user_id"]
+            }
         })
-
+        
         # Obtener incidente para notificar
         incident_response = table_inc.get_item(Key={"incident_id": incident_id})
         incident = incident_response.get("Item")
-
+        
         # Notificar via WebSocket
-        notify_department_assigned(incident_id, dep, incident)
-
+        notify_department_assigned(incident_id, departamento, incident)
+        
         return {
             'statusCode': 200,
+            'headers': {'Content-Type': 'application/json'},
             'body': json.dumps({
-                'mensaje': 'Asignado correctamente'
+                'message': 'Departamento asignado correctamente',
+                'departamento': departamento
             })
         }
-
+        
     except Exception as e:
         traceback.print_exc()
         return {
             'statusCode': 500,
+            'headers': {'Content-Type': 'application/json'},
             'body': json.dumps({
                 'error': 'Error interno'
             })
