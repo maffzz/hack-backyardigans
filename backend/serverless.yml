@@ -13,6 +13,7 @@ provider:
   environment:
     STAGE: ${self:provider.stage}
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
+    REPORTS_BUCKET: ${self:service}-reportes-${self:provider.stage}
 
 functions:
 
@@ -171,6 +172,9 @@ functions:
           cors: true
           integration: lambda
 
+  notifyDepartmentIncident:
+    handler: staff/notifyDepartmentIncident.handler
+
 
 resources:
   Resources:
@@ -279,3 +283,8 @@ resources:
               Action:
                 - s3:GetObject
               Resource: !Sub "${AttachmentsBucket.Arn}/*"
+
+    ReportsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-reportes-${self:provider.stage}
