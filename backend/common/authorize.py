@@ -17,7 +17,13 @@ def authorize(event):
     
     payload = json.loads(response["Payload"].read())
     
+    print("PAYLOAD COMPLETO:", payload)
+    
     if payload.get("statusCode") == 403:
         return None
     
-    return payload.get("body")
+    body = payload.get("body")
+    print("BODY:", body)
+    print("TIPO BODY:", type(body))
+    
+    return body
