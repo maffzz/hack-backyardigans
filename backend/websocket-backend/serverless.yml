@@ -10,7 +10,7 @@ provider:
     role: arn:aws:iam::096410127560:role/LabRole
   environment:
     CONNECTIONS_TABLE: ${self:service}-${self:provider.stage}-connections
-    WS_ENDPOINT: https://j7aujre4ia.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}
+    WS_ENDPOINT: https://4f7f6il2j5.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
