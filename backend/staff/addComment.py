@@ -27,7 +27,7 @@ def handler(event, context):
             return response(403, {"error": "Permiso denegado"})
         
         incident_id = event["pathParameters"]["id"]
-        body = json.loads(event.get("body") or "{}")
+        body = event.get("body")
         comentario = body.get("comentario")
         
         if not comentario:

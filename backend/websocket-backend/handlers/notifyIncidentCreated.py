@@ -16,7 +16,7 @@ def handler(event, context):
             incident = event["incident"]
         elif isinstance(event, dict) and "body" in event:
             # Si viene de HTTP, parsear el body
-            body = json.loads(event.get("body", "{}"))
+            body = event.get("body")
             incident = body.get("incident", body)
         else:
             incident = event

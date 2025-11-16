@@ -37,7 +37,7 @@ def handler(event, context):
     raw_body = event.get("body") or ""
 
     try:
-        body = json.loads(raw_body)
+        body = event.get("body")
     except json.JSONDecodeError:
         body = {}
 

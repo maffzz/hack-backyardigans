@@ -8,7 +8,7 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def lambda_handler(event, context):
-    body = json.loads(event["body"])
+    body = event.get("body")
 
     user_id = body["user_id"]
     password = body["password"]

@@ -24,7 +24,8 @@ def handler(event, context):
     try:
         incident_id = event["pathParameters"]["id"]
 
-        body = json.loads(event["body"])
+        body = event.get("body")
+
 
         if "file" not in body or "filename" not in body:
             return response(400, {"error": "Falta file o filename"})

@@ -24,7 +24,7 @@ def handler(event, context):
         print("EVENT:", json.dumps(event))
 
         try:
-            body = json.loads(event.get("body") or "{}")
+            body = event.get("body")
         except:
             return response(400, {"error": "Body JSON inválido"})
 

@@ -20,7 +20,7 @@ def response(code, body):
 def handler(event, context):
     try:
         incident_id = event["pathParameters"]["id"]
-        body = json.loads(event["body"])
+        body = event.get("body")
 
 
         user = authorize(event)

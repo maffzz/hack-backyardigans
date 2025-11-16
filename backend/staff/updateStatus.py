@@ -25,7 +25,7 @@ def handler(event, context):
     incident_id = event["pathParameters"]["id"]
     
     try:
-        body = json.loads(event.get("body") or "{}")
+        body = event.get("body")
     except:
         raise ValidationError("Body JSON inválido")
     

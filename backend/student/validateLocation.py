@@ -17,7 +17,7 @@ VALID = {
 
 def handler(event, context):
     try:
-        body = json.loads(event.get("body") or "{}")
+        body = event.get("body")
 
         edificio = body.get("edificio")
         piso = body.get("piso")
