@@ -1,64 +1,61 @@
-import json
 import boto3
 import uuid
-import traceback
 from datetime import datetime
-from common.response import response
 from common.websocket import notify_incident_created
 from common.authorize import authorize
 
 dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table("Incidentes")   # TABLA REAL
+table = dynamodb.Table("Incidentes")
 
 def handler(event, context):
-    try:
-        print("EVENT:", event)
-
-        body = event.get("body")
-        if body is None:
-            return response(400, {"error": "Body requerido"})
-        
-        if isinstance(body, str):
-            try:
-                body = json.loads(body)
-            except json.JSONDecodeError:
-                return response(400, {"error": "Body JSON inválido"})
-        
-        if not isinstance(body, dict):
-            return response(400, {"error": "Body debe ser un objeto JSON"})
-
-        required = ["tipo", "descripcion", "ubicacion", "urgencia"]
-        missing = [r for r in required if r not in body]
-
-        if missing:
-            return response(400, {"error": f"Faltan campos: {', '.join(missing)}"})
-
-        user = authorize(event)
-        if not user:
-            return response(403, {"error": "Token inválido"})
-
-        reporter_id = user["user_id"]
-
-        item = {
-            "incident_id": str(uuid.uuid4()),
-            "reporter_id": reporter_id,
-            "tipo": body["tipo"],
-            "descripcion": body["descripcion"],
-            "ubicacion": body["ubicacion"],
-            "urgencia": body["urgencia"],
-            "estado": "pendiente",
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat(),
+    # Entrada (json)
+    body = event.get('body', {})
+    
+    tipo = body.get('tipo')
+    descripcion = body.get('descripcion')
+    ubicacion = body.get('ubicacion')
+    urgencia = body.get('urgencia')
+    
+    # Validar campos requeridos
+    if not tipo or not descripcion or not ubicacion or not urgencia:
+        return {
+            'statusCode': 400,
+            'body': {'error': 'Faltan campos requeridos'}
         }
-
-        table.put_item(Item=item)
-
-        # Enviar notificación WebSocket
-        notify_incident_created(item)
-
-        return response(201, {"message": "Incidente creado", "data": item})
-
-    except Exception as e:
-        traceback.print_exc()
-        return response(500, {"error": str(e)})
-
+    
+    # Autorizar usuario
+    user = authorize(event)
+    if not user:
+        return {
+            'statusCode': 403,
+            'body': {'error': 'Token inválido'}
+        }
+    
+    # Proceso
+    reporter_id = user["user_id"]
+    
+    item = {
+        "incident_id": str(uuid.uuid4()),
+        "reporter_id": reporter_id,
+        "tipo": tipo,
+        "descripcion": descripcion,
+        "ubicacion": ubicacion,
+        "urgencia": urgencia,
+        "estado": "pendiente",
+        "created_at": datetime.utcnow().isoformat(),
+        "updated_at": datetime.utcnow().isoformat()
+    }
+    
+    table.put_item(Item=item)
+    
+    # Notificar WebSocket
+    notify_incident_created(item)
+    
+    # Salida (json)
+    return {
+        'statusCode': 201,
+        'body': {
+            'message': 'Incidente creado',
+            'data': item
+        }
+    }
