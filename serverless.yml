@@ -37,6 +37,8 @@ functions:
           path: student/incidents
           method: post
           cors: true
+          integration: lambda
+
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -51,6 +53,7 @@ functions:
           path: student/incidents
           method: get
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -65,6 +68,7 @@ functions:
           path: student/incidents/mine
           method: get
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -79,6 +83,7 @@ functions:
           path: student/incidents/{id}
           method: get
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -93,6 +98,7 @@ functions:
           path: student/incidents/{id}/attachments
           method: post
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -107,6 +113,7 @@ functions:
           path: student/incidents/validate-location
           method: post
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -121,6 +128,7 @@ functions:
           path: student/incidents/preview
           method: post
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -135,6 +143,7 @@ functions:
           path: student/incidents/stats/basic
           method: get
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -151,6 +160,7 @@ functions:
           path: staff/incidents/{id}/status
           method: put
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -165,6 +175,7 @@ functions:
           path: staff/incidents/{id}/comment
           method: post
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -179,6 +190,7 @@ functions:
           path: staff/incidents/{id}/assign
           method: post
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -193,6 +205,7 @@ functions:
           path: staff/incidents/by-department
           method: get
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -207,6 +220,7 @@ functions:
           path: staff/incidents/{id}/events
           method: get
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
@@ -221,6 +235,7 @@ functions:
           path: staff/incidents/stats
           method: get
           cors: true
+          integration: lambda
           authorizer:
             type: COGNITO
             userPoolArn:
