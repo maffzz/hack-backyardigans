@@ -20,8 +20,8 @@ def handler(event, context):
     try:
         user = get_user_from_request(event)
         
-        # Validar que sea staff o authority
-        if user["role"] not in ["staff", "authority"]:
+        # Validar que sea staff o admin
+        if user["role"] not in ["staff", "admin"]:
             return response(403, {"error": "Permiso denegado"})
         
         incident_id = event["pathParameters"]["id"]

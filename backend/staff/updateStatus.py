@@ -43,8 +43,8 @@ def handler(event, context):
     
     user = get_user_from_request(event)
     
-    # Validar que sea staff o authority
-    if user["role"] not in ["staff", "authority"]:
+    # Validar que sea staff o admin
+    if user["role"] not in ["staff", "admin"]:
         raise ValidationError("Solo staff o authorities pueden actualizar estados")
     
     # Obtener incidente actual
