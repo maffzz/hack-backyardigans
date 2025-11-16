@@ -27,8 +27,8 @@ def load_incidents(seed_path: str = "seed_incidents.json"):
 def seed_attachments(incidents):
     """Sube archivos de ejemplo al bucket de adjuntos.
 
-    Crea, para cada incidente, un archivo de texto simple que simula ser
-    una evidencia subida por el estudiante.
+    Para cada incidente genera varias "fotos" dummy (p. ej. 5 archivos)
+    bajo la carpeta del incident_id.
     """
     if not incidents:
         return
@@ -40,18 +40,24 @@ def seed_attachments(incidents):
         if not incident_id:
             continue
 
-        key = f"{incident_id}/seed_evidencia.txt"
-        body = (
-            f"Incidente {incident_id}\n"
-            f"Tipo: {inc.get('tipo', 'N/A')}\n"
-            f"Urgencia: {inc.get('urgencia', 'N/A')}\n"
-            f"Descripción: {inc.get('descripcion', '')[:200]}\n"
-        )
-        try:
-            s3.put_object(Bucket=ATTACHMENTS_BUCKET, Key=key, Body=body.encode("utf-8"))
-            print(f"[OK] Adjuntar dummy -> s3://{ATTACHMENTS_BUCKET}/{key}")
-        except Exception as e:
-            print(f"[ERROR] Subiendo adjunto para {incident_id}: {e}")
+        for i in range(1, 6):  # 5 archivos por incidente
+            key = f"{incident_id}/seed_foto_{i}.txt"
+            body = (
+                f"Incidente {incident_id}\n"\
+                f"Archivo simulado #{i}\n"\
+                f"Tipo: {inc.get('tipo', 'N/A')}\n"\
+                f"Urgencia: {inc.get('urgencia', 'N/A')}\n"\
+                f"Descripción: {inc.get('descripcion', '')[:200]}\n"\
+            )
+            try:
+                s3.put_object(
+                    Bucket=ATTACHMENTS_BUCKET,
+                    Key=key,
+                    Body=body.encode("utf-8"),
+                )
+                print(f"[OK] Adjuntar dummy -> s3://{ATTACHMENTS_BUCKET}/{key}")
+            except Exception as e:
+                print(f"[ERROR] Subiendo adjunto para {incident_id} ({i}): {e}")
 
 
 def seed_reports(incidents):
