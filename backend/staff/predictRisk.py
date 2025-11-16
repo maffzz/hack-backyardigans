@@ -5,7 +5,7 @@ from datetime import datetime
 from common.authorize import authorize  # ya existe en tu backend
 
 runtime = boto3.client("sagemaker-runtime", region_name=os.environ.get("AWS_REGION", "us-east-1"))
-ENDPOINT_NAME = os.environ.get("RISK_MODEL_ENDPOINT", "alertautec-risk-model-dev")
+ENDPOINT_NAME = os.environ.get("RISK_MODEL_ENDPOINT", "alertautec-risk-model")
 
 def handler(event, context):
     try:

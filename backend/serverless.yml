@@ -14,7 +14,7 @@ provider:
     STAGE: ${self:provider.stage}
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
     REPORTS_BUCKET: ${self:service}-reportes-${self:provider.stage}
-    RISK_MODEL_ENDPOINT: alertautec-risk-model-dev   # o el nombre real de tu endpoint
+    RISK_MODEL_ENDPOINT: alertautec-risk-model   # o el nombre real de tu endpoint
 
 functions:
 
