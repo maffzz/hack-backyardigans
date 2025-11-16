@@ -43,3 +43,16 @@ functions:
     events:
       - websocket:
           route: $default
+
+  # Notification functions invoked from backend
+  notifyIncidentCreated:
+    handler: handlers/notifyIncidentCreated.handler
+
+  notifyIncidentStatusChanged:
+    handler: handlers/notifyIncidentStatusChanged.handler
+
+  notifyCommentAdded:
+    handler: handlers/notifyCommentAdded.handler
+
+  notifyDepartmentAssigned:
+    handler: handlers/notifyDepartmentAssigned.handler
