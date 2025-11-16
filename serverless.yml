@@ -38,13 +38,10 @@ functions:
           method: post
           cors: true
           integration: lambda
-
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   listIncidents:
     handler: student/listIncidents.handler
@@ -55,11 +52,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   listMine:
     handler: student/listMine.handler
@@ -70,11 +65,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   getIncident:
     handler: student/getIncident.handler
@@ -85,11 +78,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   uploadAttachment:
     handler: student/uploadAttachment.handler
@@ -100,11 +91,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   validateLocation:
     handler: student/validateLocation.handler
@@ -115,11 +104,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   previewIncident:
     handler: student/previewIncident.handler
@@ -130,11 +117,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   statsBasic:
     handler: student/statsBasic.handler
@@ -145,13 +130,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
-
-
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   updateStatus:
     handler: staff/updateStatus.handler
@@ -162,11 +143,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   addComment:
     handler: staff/addComment.handler
@@ -177,11 +156,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   assignDepartment:
     handler: staff/assignDepartment.handler
@@ -192,11 +169,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   listForDepartment:
     handler: staff/listForDepartment.handler
@@ -207,11 +182,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   getIncidentEvents:
     handler: staff/getIncidentEvents.handler
@@ -222,11 +195,9 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
   staffStats:
     handler: staff/staffStats.handler
@@ -237,14 +208,25 @@ functions:
           cors: true
           integration: lambda
           authorizer:
-            type: COGNITO
-            userPoolArn:
-              Fn::GetAtt:
-                - CognitoUserPool
-                - Arn
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
 resources:
   Resources:
+
+    ApiGatewayAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: CognitoAuthorizer
+        Type: COGNITO_USER_POOLS
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ProviderARNs:
+          - Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
+        IdentitySource: method.request.header.Authorization
 
     Incidentes:
       Type: AWS::DynamoDB::Table
@@ -273,7 +255,6 @@ resources:
           - AttributeName: timestamp
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
-
 
     Departamentos:
       Type: AWS::DynamoDB::Table
@@ -313,11 +294,11 @@ resources:
             Required: true
             Mutable: false
           - Name: department
-            AttributeDataType: "String"
+            AttributeDataType: String
             Mutable: true
             Required: false
           - Name: role
-            AttributeDataType: "String"
+            AttributeDataType: String
             Mutable: true
             Required: false
         Policies:
