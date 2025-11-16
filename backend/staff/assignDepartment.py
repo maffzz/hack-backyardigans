@@ -14,7 +14,7 @@ def response(code, body):
     return {
         "statusCode": code,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(body)
+        "body": body
     }
 
 def handler(event, context):

@@ -11,5 +11,5 @@ def handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps({"message": "Disconnected", "connectionId": connection_id}),
+        "body": {"message": "Disconnected", "connectionId": connection_id},
     }

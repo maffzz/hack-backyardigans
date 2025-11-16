@@ -11,7 +11,7 @@ def authorize(event):
     response = lambda_client.invoke(
         FunctionName="alertautec-backend-dev-ValidarTokenAcceso",
         InvocationType="RequestResponse",
-        Payload=json.dumps({"token": token})
+        Payload={"token": token}
     )
 
     payload = json.loads(response["Payload"].read())

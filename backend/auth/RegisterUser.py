@@ -14,7 +14,7 @@ def lambda_handler(event, context):
     department = body.get("department")  # solo staff
 
     if not user_id or not password or not role:
-        return {"statusCode": 400, "body": json.dumps({"error": "Missing fields"})}
+        return {"statusCode": 400, "body": {"error": "Missing fields"}}
 
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table("Users")
@@ -26,4 +26,4 @@ def lambda_handler(event, context):
         "department": department if department else None
     })
 
-    return {"statusCode": 200, "body": json.dumps({"message": "User registered"})}
+    return {"statusCode": 200, "body": {"message": "User registered"}}

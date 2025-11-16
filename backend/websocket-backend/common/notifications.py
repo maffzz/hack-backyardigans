@@ -27,7 +27,7 @@ def _post_to_connection(connection_id: str, payload: dict) -> None:
         print("WS_ENDPOINT no configurado, no se puede enviar mensaje WebSocket")
         return
     
-    data_bytes = json.dumps(payload).encode("utf-8")
+    data_bytes = payload.encode("utf-8")
     try:
         apigw.post_to_connection(ConnectionId=connection_id, Data=data_bytes)
     except apigw.exceptions.GoneException:

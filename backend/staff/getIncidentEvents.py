@@ -8,7 +8,7 @@ def response(code, body):
     return {
         "statusCode": code,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(body)
+        "body": body
     }
 
 def handler(event, context):
@@ -38,7 +38,7 @@ def handler(event, context):
         response_data = {
             "data": result["items"],
             "pagination": {
-                "nextKey": json.dumps(result["last_evaluated_key"]) if result["last_evaluated_key"] else None,
+                "nextKey": result["last_evaluated_key"] if result["last_evaluated_key"] else None,
                 "limit": limit,
                 "hasMore": result["last_evaluated_key"] is not None,
                 "count": result["count"]

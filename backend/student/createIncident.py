@@ -16,12 +16,12 @@ def response(code, body):
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
         },
-        "body": json.dumps(body)
+        "body": body
     }
 
 def handler(event, context):
     try:
-        print("EVENT:", json.dumps(event))
+        print("EVENT:", event)
 
         try:
             body = event.get("body")

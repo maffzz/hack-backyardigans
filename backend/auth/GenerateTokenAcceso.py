@@ -39,9 +39,9 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps({
+        "body": {
             "token": token,
             "role": user["role"],
             "department": user.get("department")
-        })
+        }
     }

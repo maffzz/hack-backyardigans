@@ -7,7 +7,7 @@ def response(code, body):
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
         },
-        "body": json.dumps(body)
+        "body": body
     }
 
 VALID = {

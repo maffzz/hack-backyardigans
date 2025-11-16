@@ -25,12 +25,12 @@ def handler(event, context):
         
         return {
             "statusCode": 200,
-            "body": json.dumps({"message": "Notification sent"})
+            "body": {"message": "Notification sent"}
         }
     except Exception as e:
         print(f"Error en notifyIncidentCreated: {e}")
         return {
             "statusCode": 500,
-            "body": json.dumps({"error": str(e)})
+            "body": {"error": str(e)}
         }
 
