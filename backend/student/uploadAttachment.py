@@ -4,7 +4,6 @@ import boto3
 import base64
 import uuid
 import traceback
-from common.response import response
 
 s3 = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
@@ -17,15 +16,24 @@ def handler(event, context):
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
         if not incident_id:
-            return response(400, {"error": "ID de incidente requerido"})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'error': 'ID de incidente requerido'
+                }
+            }
 
         body = event.get("body")
         if isinstance(body, str):
             body = json.loads(body)
 
-
         if "file" not in body or "filename" not in body:
-            return response(400, {"error": "Falta file o filename"})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'error': 'Falta file o filename'
+                }
+            }
 
         file_data = base64.b64decode(body["file"])
         filename = f"{incident_id}/{uuid.uuid4()}_{body['filename']}"
@@ -52,8 +60,19 @@ def handler(event, context):
             }
         )
 
-        return response(200, {"message": "Archivo subido", "url": file_url})
+        return {
+            'statusCode': 200,
+            'body': {
+                'message': 'Archivo subido',
+                'url': file_url
+            }
+        }
 
     except Exception as e:
         traceback.print_exc()
-        return response(500, {"error": str(e)})
+        return {
+            'statusCode': 500,
+            'body': {
+                'error': str(e)
+            }
+        }

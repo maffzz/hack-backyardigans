@@ -1,24 +1,38 @@
 import json
 import boto3
 import traceback
-from common.response import response
 from common.authorize import authorize
 from common.database import DatabaseHelper
+from common.helpers import convert_decimals
 
 def handler(event, context):
     try:
         user = authorize(event)
         if not user:
-            return response(403, {"error": "Token inválido"})
+            return {
+                'statusCode': 403,
+                'body': {
+                    'error': 'Token inválido'
+                }
+            }
 
         if user["role"] not in ["staff", "admin"]:
-            return response(403, {"error": "Permiso denegado"})
+            return {
+                'statusCode': 403,
+                'body': {
+                    'error': 'Permiso denegado'
+                }
+            }
 
-        
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
         if not incident_id:
-            return response(400, {"error": "ID de incidente requerido"})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'error': 'ID de incidente requerido'
+                }
+            }
         
         # Parámetros de paginación
         query_params = event.get("queryStringParameters") or {}
@@ -32,8 +46,10 @@ def handler(event, context):
             last_evaluated_key=json.loads(last_key) if last_key else None
         )
         
+        items = convert_decimals(result["items"])
+        
         response_data = {
-            "data": result["items"],
+            "data": items,
             "pagination": {
                 "nextKey": result["last_evaluated_key"] if result["last_evaluated_key"] else None,
                 "limit": limit,
@@ -42,7 +58,15 @@ def handler(event, context):
             }
         }
         
-        return response(200, response_data)
+        return {
+            'statusCode': 200,
+            'body': response_data
+        }
     except Exception as e:
         traceback.print_exc()
-        return response(500, {"error": "Error interno"})
+        return {
+            'statusCode': 500,
+            'body': {
+                'error': 'Error interno'
+            }
+        }

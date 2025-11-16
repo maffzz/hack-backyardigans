@@ -3,7 +3,6 @@ import boto3
 from datetime import datetime 
 import uuid
 import traceback
-from common.response import response
 from common.authorize import authorize
 from common.websocket import notify_comment_added
 
@@ -12,18 +11,32 @@ table_evt = dynamodb.Table("IncidenteEventos")
 
 def handler(event, context):
     try:
-
         user = authorize(event)
         if not user:
-            return response(403, {"error": "Token inválido"})
+            return {
+                'statusCode': 403,
+                'body': {
+                    'error': 'Token inválido'
+                }
+            }
 
         if user["role"] not in ["staff", "admin"]:
-            return response(403, {"error": "Permiso denegado"})
+            return {
+                'statusCode': 403,
+                'body': {
+                    'error': 'Permiso denegado'
+                }
+            }
         
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
         if not incident_id:
-            return response(400, {"error": "ID de incidente requerido"})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'error': 'ID de incidente requerido'
+                }
+            }
         
         body = event.get("body")
         if isinstance(body, str):
@@ -31,7 +44,12 @@ def handler(event, context):
         comentario = body.get("comentario")
         
         if not comentario:
-            return response(400, {"error": "Falta comentario"})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'error': 'Falta comentario'
+                }
+            }
         
         event_data = {
             "incident_id": incident_id,
@@ -49,7 +67,17 @@ def handler(event, context):
         # Notificar via WebSocket
         notify_comment_added(incident_id, comentario, user.get("user_id", "Usuario"))
 
-        return response(200, {"mensaje": "Comentario agregado"})
-    except:
+        return {
+            'statusCode': 200,
+            'body': {
+                'mensaje': 'Comentario agregado'
+            }
+        }
+    except Exception as e:
         traceback.print_exc()
-        return response(500, {"error": "Error interno"})
+        return {
+            'statusCode': 500,
+            'body': {
+                'error': 'Error interno'
+            }
+        }

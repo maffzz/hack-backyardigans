@@ -1,5 +1,4 @@
 import json
-from common.response import response
 from common.authorize import authorize
 import boto3
 from datetime import datetime
@@ -16,24 +15,42 @@ def handler(event, context):
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
         if not incident_id:
-            return response(400, {"error": "ID de incidente requerido"})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'error': 'ID de incidente requerido'
+                }
+            }
         
         body = event.get("body")
         if isinstance(body, str):
             body = json.loads(body)
 
-
         user = authorize(event)
         if not user:
-            return response(403, {"error": "Token inválido"})
+            return {
+                'statusCode': 403,
+                'body': {
+                    'error': 'Token inválido'
+                }
+            }
 
         if user["role"] not in ["staff", "admin"]:
-            return response(403, {"error": "No autorizado"})
+            return {
+                'statusCode': 403,
+                'body': {
+                    'error': 'No autorizado'
+                }
+            }
 
         dep = user.get("department")
         if not dep:
-            return response(400, {"error": "Tu usuario no tiene departamento"})
-
+            return {
+                'statusCode': 400,
+                'body': {
+                    'error': 'Tu usuario no tiene departamento'
+                }
+            }
 
         # update Incidente
         table_inc.update_item(
@@ -58,8 +75,18 @@ def handler(event, context):
         # Notificar via WebSocket
         notify_department_assigned(incident_id, dep, incident)
 
-        return response(200, {"mensaje": "Asignado correctamente"})
+        return {
+            'statusCode': 200,
+            'body': {
+                'mensaje': 'Asignado correctamente'
+            }
+        }
 
-    except:
+    except Exception as e:
         traceback.print_exc()
-        return response(500, {"error": "Error interno"})
+        return {
+            'statusCode': 500,
+            'body': {
+                'error': 'Error interno'
+            }
+        }

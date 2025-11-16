@@ -1,4 +1,3 @@
-from common.response import response
 from common.locations import get_valid_locations
 
 def handler(event, context):
@@ -16,8 +15,16 @@ def handler(event, context):
                 "coordenadas": location_data.get("coordenadas", {})
             })
         
-        return response(200, {
-            "locations": formatted_locations
-        })
+        return {
+            'statusCode': 200,
+            'body': {
+                'locations': formatted_locations
+            }
+        }
     except Exception as e:
-        return response(500, {"error": str(e)})
+        return {
+            'statusCode': 500,
+            'body': {
+                'error': str(e)
+            }
+        }

@@ -1,5 +1,4 @@
 import json
-from common.response import response
 
 VALID = {
     "1": list(range(1, 12)),  
@@ -16,12 +15,34 @@ def handler(event, context):
         piso = body.get("piso")
 
         if edificio not in VALID:
-            return response(400, {"valid": False, "error": "Edificio no existe"})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'valid': False,
+                    'error': 'Edificio no existe'
+                }
+            }
 
         if piso not in VALID[edificio]:
-            return response(400, {"valid": False, "error": "Piso inválido"})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'valid': False,
+                    'error': 'Piso inválido'
+                }
+            }
 
-        return response(200, {"valid": True})
+        return {
+            'statusCode': 200,
+            'body': {
+                'valid': True
+            }
+        }
 
     except Exception as e:
-        return response(500, {"error": str(e)})
+        return {
+            'statusCode': 500,
+            'body': {
+                'error': str(e)
+            }
+        }

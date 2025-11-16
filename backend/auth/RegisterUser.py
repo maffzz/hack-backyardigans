@@ -7,6 +7,9 @@ def hash_password(password):
 def lambda_handler(event, context):
     try:
         body = event.get("body", {})
+        if isinstance(body, str):
+            import json
+            body = json.loads(body)
         
         user_id = body.get("user_id")
         password = body.get("password")

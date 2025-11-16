@@ -18,16 +18,29 @@ def handle_error(func):
         try:
             return func(*args, **kwargs)
         except ValidationError as e:
-            from common.response import response
-            return response(400, {"error": e.message, "field": e.field})
+            return {
+                'statusCode': 400,
+                'body': {
+                    'error': e.message,
+                    'field': e.field
+                }
+            }
         except NotFoundError as e:
-            from common.response import response
-            return response(404, {"error": e.message})
+            return {
+                'statusCode': 404,
+                'body': {
+                    'error': e.message
+                }
+            }
         except Exception as e:
             import traceback
             traceback.print_exc()
-            from common.response import response
-            return response(500, {"error": str(e)})
+            return {
+                'statusCode': 500,
+                'body': {
+                    'error': str(e)
+                }
+            }
     return wrapper
 
 def validate_status_change(new_status, current_status):
