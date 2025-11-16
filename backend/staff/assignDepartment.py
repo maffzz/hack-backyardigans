@@ -4,11 +4,21 @@ import boto3
 from datetime import datetime
 import uuid
 import traceback
+import os
 from common.websocket import notify_department_assigned
 
 dynamodb = boto3.resource("dynamodb")
 table_inc = dynamodb.Table("Incidentes")
 table_evt = dynamodb.Table("IncidenteEventos")
+
+s3 = boto3.client("s3")
+lambda_client = boto3.client("lambda")
+
+REPORTS_BUCKET = os.environ.get("REPORTS_BUCKET", "alertautec-backend-reportes-dev")
+LAMBDA_NOTIFY = os.environ.get(
+    "NOTIFY_DEPT_LAMBDA",
+    "alertautec-backend-dev-notifyDepartmentIncident",
+)
 
 def handler(event, context):
     try:
@@ -84,6 +94,31 @@ def handler(event, context):
         # Obtener incidente para notificar
         incident_response = table_inc.get_item(Key={"incident_id": incident_id})
         incident = incident_response.get("Item")
+
+        # Generar reporte individual en S3 inmediatamente
+        report_key = f"reportes/incidentes/{departamento}/incidente_{incident_id}.json"
+        report_body = {
+            "incident": incident,
+            "generated_at": datetime.utcnow().isoformat(),
+        }
+
+        s3.put_object(
+            Bucket=REPORTS_BUCKET,
+            Key=report_key,
+            Body=json.dumps(report_body),
+        )
+
+        # Invocar Lambda notifyDepartmentIncident (misma que usa Airflow)
+        lambda_client.invoke(
+            FunctionName=LAMBDA_NOTIFY,
+            InvocationType="Event",
+            Payload=json.dumps({
+                "incident_id": incident_id,
+                "departamento": departamento,
+                "s3_bucket": REPORTS_BUCKET,
+                "s3_key": report_key,
+            }),
+        )
         
         # Notificar via WebSocket
         notify_department_assigned(incident_id, departamento, incident)
