@@ -12,8 +12,12 @@ provider:
     role: arn:aws:iam::096410127560:role/LabRole
   environment:
     STAGE: ${self:provider.stage}
+    SERVICE_NAME: ${self:service}
+    AWS_REGION: ${self:provider.region}
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
     REPORTS_BUCKET: ${self:service}-reportes-${self:provider.stage}
+    SNS_TOPIC_ARN:
+      Ref: IncidentNotificationsTopic
 
 functions:
 
