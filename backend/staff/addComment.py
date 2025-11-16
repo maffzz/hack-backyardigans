@@ -20,7 +20,8 @@ def handler(event, context):
                 })
             }
 
-        if user["role"] not in ["staff", "admin"]:
+        role = str(user.get("role", "")).lower()
+        if role not in ["staff", "admin"]:
             return {
                 'statusCode': 403,
                 'body': json.dumps({

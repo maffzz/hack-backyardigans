@@ -50,17 +50,19 @@ def main():
         incidents = json.load(f)
 
     for inc in incidents:
-        payload = inc.copy()
-
-        # Aplanar ubicacion para que coincida con el handler actual
-        if isinstance(payload.get("ubicacion"), dict):
-            for k, v in payload["ubicacion"].items():
-                payload[f"ubicacion_{k}"] = v
-            del payload["ubicacion"]
+        # El handler createIncident espera:
+        #  tipo, descripcion, ubicacion (dict), urgencia
+        #  y toma el reporter_id desde el token, no del body.
+        payload = {
+            "tipo": inc.get("tipo"),
+            "descripcion": inc.get("descripcion"),
+            "ubicacion": inc.get("ubicacion"),
+            "urgencia": inc.get("urgencia"),
+        }
 
         # Hacer login como el reporter_id si está definido en seed_users
         headers = {}
-        reporter_id = payload.get("reporter_id")
+        reporter_id = inc.get("reporter_id")
         if reporter_id and reporter_id in user_passwords:
             token = login(reporter_id, user_passwords[reporter_id])
             if token:
