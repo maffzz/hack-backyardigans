@@ -1,18 +1,32 @@
 import json
 import boto3
 import traceback
+from decimal import Decimal
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")
 
+def decimal_default(obj):
+    """Convierte Decimal a float para JSON serialization"""
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError
+
 def response(code, body):
+    if isinstance(body, dict):
+        body_str = json.dumps(body, default=decimal_default)
+    elif isinstance(body, str):
+        body_str = body
+    else:
+        body_str = json.dumps({"error": str(body)}, default=decimal_default)
+    
     return {
         "statusCode": code,
         "headers": {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
         },
-        "body": body
+        "body": body_str
     }
 
 def handler(event, context):
