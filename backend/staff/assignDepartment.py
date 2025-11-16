@@ -14,13 +14,19 @@ def response(code, body):
     return {
         "statusCode": code,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": body
+        "body": json.dumps(body) if isinstance(body, dict) else body
     }
 
 def handler(event, context):
     try:
-        incident_id = event["pathParameters"]["id"]
+        path_params = event.get("pathParameters") or {}
+        incident_id = path_params.get("id")
+        if not incident_id:
+            return response(400, {"error": "ID de incidente requerido"})
+        
         body = event.get("body")
+        if isinstance(body, str):
+            body = json.loads(body)
 
 
         user = authorize(event)

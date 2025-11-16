@@ -13,7 +13,7 @@ def response(code, body):
     return {
         "statusCode": code,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": body
+        "body": json.dumps(body) if isinstance(body, dict) else body
     }
 
 def handler(event, context):
@@ -26,8 +26,14 @@ def handler(event, context):
         if user["role"] not in ["staff", "admin"]:
             return response(403, {"error": "Permiso denegado"})
         
-        incident_id = event["pathParameters"]["id"]
+        path_params = event.get("pathParameters") or {}
+        incident_id = path_params.get("id")
+        if not incident_id:
+            return response(400, {"error": "ID de incidente requerido"})
+        
         body = event.get("body")
+        if isinstance(body, str):
+            body = json.loads(body)
         comentario = body.get("comentario")
         
         if not comentario:
@@ -47,7 +53,7 @@ def handler(event, context):
         table_evt.put_item(Item=event_data)
 
         # Notificar via WebSocket
-        notify_comment_added(incident_id, comentario, user["name"])
+        notify_comment_added(incident_id, comentario, user.get("user_id", "Usuario"))
 
         return response(200, {"mensaje": "Comentario agregado"})
     except:

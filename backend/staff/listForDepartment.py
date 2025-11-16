@@ -10,7 +10,7 @@ def response(code, body):
     return {
         "statusCode": code,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": body
+        "body": json.dumps(body) if isinstance(body, dict) else body
     }
 
 def handler(event, context):

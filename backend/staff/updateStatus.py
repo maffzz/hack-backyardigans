@@ -17,17 +17,22 @@ def response(code, body):
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
         },
-        "body": body
+        "body": json.dumps(body) if isinstance(body, dict) else body
     }
 
 @handle_error
 def handler(event, context):
-    incident_id = event["pathParameters"]["id"]
+    path_params = event.get("pathParameters") or {}
+    incident_id = path_params.get("id")
+    if not incident_id:
+        raise ValidationError("ID de incidente requerido")
     
-    try:
-        body = event.get("body")
-    except:
-        raise ValidationError("Body JSON inválido")
+    body = event.get("body")
+    if isinstance(body, str):
+        try:
+            body = json.loads(body)
+        except:
+            raise ValidationError("Body JSON inválido")
     
     new_status = body.get("estado")
     
@@ -46,11 +51,7 @@ def handler(event, context):
         raise ValidationError("Token inválido")
 
     if user["role"] not in ["staff", "admin"]:
-        raise ValidationError("No autorizado")
-    
-    # Validar que sea staff o admin
-    if user["role"] not in ["staff", "admin"]:
-        raise ValidationError("Solo staff o authorities pueden actualizar estados")
+        raise ValidationError("Solo staff o admin pueden actualizar estados")
     
     # Obtener incidente actual
     try:
@@ -104,6 +105,6 @@ def handler(event, context):
             "incident_id": incident_id,
             "estado_anterior": current_status,
             "estado_nuevo": new_status,
-            "actualizado_por": user["name"]
+            "actualizado_por": user.get("user_id", "Usuario")
         }
     })
