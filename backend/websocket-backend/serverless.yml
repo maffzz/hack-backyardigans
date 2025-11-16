@@ -1,4 +1,4 @@
-org: asaldarriaga
+org: martinbonilla
 service: websocket-backend
 
 provider:
@@ -7,7 +7,7 @@ provider:
   region: us-east-1
   stage: dev
   iam:
-    role: arn:aws:iam::850825902355:role/LabRole
+    role: arn:aws:iam::492147277453:role/LabRole
   environment:
     CONNECTIONS_TABLE: ${self:service}-${self:provider.stage}-connections
     WS_ENDPOINT: https://j7aujre4ia.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}

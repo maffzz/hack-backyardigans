@@ -1,4 +1,4 @@
-org: asaldarriaga
+org: martinbonilla
 service: alertautec-backend
 
 provider:
@@ -9,7 +9,7 @@ provider:
   stage: dev
   region: us-east-1
   iam:
-    role: arn:aws:iam::258454103606:role/LabRole
+    role: arn:aws:iam::492147277453:role/LabRole
   environment:
     STAGE: ${self:provider.stage}
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
