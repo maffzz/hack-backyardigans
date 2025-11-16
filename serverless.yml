@@ -1,0 +1,67 @@
+org: martinbonilla
+service: alertautec-backend
+
+provider:
+  name: aws
+  runtime: python3.13
+  memorySize: 1024
+  timeout: 30
+  stage: dev
+  region: us-east-1
+  iam:
+    role: arn:aws:iam::486926857723:role/LabRole
+
+resources:
+  Resources:
+
+    Incidentes:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Incidentes
+        AttributeDefinitions:
+          - AttributeName: incident_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: incident_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    IncidenteEventos:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: IncidenteEventos
+        AttributeDefinitions:
+          - AttributeName: incident_id
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: incident_id
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+    WebSocketConnections:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: WebSocketConnections
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    Departamentos:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Departamentos
+        AttributeDefinitions:
+          - AttributeName: department_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: department_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
