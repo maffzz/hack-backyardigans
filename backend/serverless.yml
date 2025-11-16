@@ -14,7 +14,8 @@ provider:
     STAGE: ${self:provider.stage}
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
     REPORTS_BUCKET: ${self:service}-reportes-${self:provider.stage}
-    RISK_MODEL_ENDPOINT: alertautec-risk-model   # o el nombre real de tu endpoint
+    RISK_MODEL_ENDPOINT: alertautec-risk-model
+    SNS_TOPIC_ARN: !Ref IncidentNotificationsTopic
 
 functions:
 
@@ -146,8 +147,8 @@ functions:
           cors: true
           integration: lambda-proxy
 
-  listForDepartment:
-    handler: staff/listForDepartment.handler
+  listByDepartment:
+    handler: staff/listByDepartment.handler
     events:
       - http:
           path: staff/incidents/by-department
@@ -173,6 +174,8 @@ functions:
           cors: true
           integration: lambda
 
+  # --- NOTIFICACIONES ---
+  
   notifyDepartmentIncident:
     handler: staff/notifyDepartmentIncident.handler
 
@@ -184,6 +187,9 @@ functions:
           method: post
           cors: true
           integration: lambda-proxy
+
+  notifyUrgentIncident:
+    handler: staff/notifyUrgentIncident.handler
 
 resources:
   Resources:

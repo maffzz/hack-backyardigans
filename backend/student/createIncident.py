@@ -1,18 +1,19 @@
 import boto3
 import uuid
+import json
 from datetime import datetime
 from common.websocket import notify_incident_created
 from common.authorize import authorize
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")
+lambda_client = boto3.client("lambda")
 
 def handler(event, context):
     try:
         # Entrada (json)
         body = event.get('body', {})
         if isinstance(body, str):
-            import json
             body = json.loads(body)
         
         tipo = body.get('tipo')
@@ -54,6 +55,19 @@ def handler(event, context):
         
         # Notificar WebSocket
         notify_incident_created(item)
+        
+        # Si es urgente, disparar notificación inmediata por email
+        if urgencia.upper() == "ALTA" or tipo.upper() == "EMERGENCIA":
+            try:
+                lambda_client.invoke(
+                    FunctionName="alertautec-backend-dev-notifyUrgentIncident",
+                    InvocationType="Event",  # Asíncrono
+                    Payload=json.dumps({"incident": item})
+                )
+                print(f"✅ Notificación urgente disparada para incidente {item['incident_id']}")
+            except Exception as e:
+                # No fallar si la notificación falla
+                print(f"⚠️ Error disparando notificación urgente: {e}")
         
         # Salida (json)
         return {
