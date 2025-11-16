@@ -12,12 +12,8 @@ provider:
     role: arn:aws:iam::096410127560:role/LabRole
   environment:
     STAGE: ${self:provider.stage}
-    SERVICE_NAME: ${self:service}
-    AWS_REGION: ${self:provider.region}
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
     REPORTS_BUCKET: ${self:service}-reportes-${self:provider.stage}
-    SNS_TOPIC_ARN:
-      Ref: IncidentNotificationsTopic
 
 functions:
 
@@ -180,10 +176,6 @@ functions:
     handler: staff/notifyDepartmentIncident.handler
 
 
-  sendEmailNotification:
-    handler: notifications/sendEmailNotification.handler
-
-
 resources:
   Resources:
 
@@ -296,34 +288,3 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:service}-reportes-${self:provider.stage}
-        PublicAccessBlockConfiguration:
-          BlockPublicAcls: false
-          BlockPublicPolicy: false
-          IgnorePublicAcls: false
-          RestrictPublicBuckets: false
-        AccessControl: PublicRead
-        WebsiteConfiguration:
-          IndexDocument: index.html
-
-    ReportsBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Properties:
-        Bucket: !Ref ReportsBucket
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Sid: PublicReadForGetBucketObjects
-              Effect: Allow
-              Principal: "*"
-              Action:
-                - s3:GetObject
-              Resource: !Sub "${ReportsBucket.Arn}/*"
-              
-    IncidentNotificationsTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-        TopicName: ${self:service}-incident-notifications-${self:provider.stage}
-        DisplayName: Incident Notifications
-        Subscription:
-          - Protocol: email
-            Endpoint: martin.bonilla@utec.edu.pe
