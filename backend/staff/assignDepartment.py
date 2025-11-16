@@ -6,6 +6,7 @@ import uuid
 import traceback
 import os
 from common.websocket import notify_department_assigned
+from common.helpers import convert_decimals
 
 dynamodb = boto3.resource("dynamodb")
 table_inc = dynamodb.Table("Incidentes")
@@ -95,10 +96,13 @@ def handler(event, context):
         incident_response = table_inc.get_item(Key={"incident_id": incident_id})
         incident = incident_response.get("Item")
 
+        # Convertir Decimals a tipos nativos para JSON (por ejemplo, floats)
+        incident_serializable = convert_decimals(incident) if incident else None
+
         # Generar reporte individual en S3 inmediatamente
         report_key = f"reportes/incidentes/{departamento}/incidente_{incident_id}.json"
         report_body = {
-            "incident": incident,
+            "incident": incident_serializable,
             "generated_at": datetime.utcnow().isoformat(),
         }
 
