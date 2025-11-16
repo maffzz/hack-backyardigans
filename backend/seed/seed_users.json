@@ -1,18 +1,34 @@
 [
-  {
-    "user_id": "admin@utec.edu.pe",
-    "password": "admin123",
-    "role": "ADMIN"
-  },
-  {
-    "user_id": "juan.staff@utec.edu.pe",
-    "password": "staff123",
-    "role": "STAFF",
-    "department": "MANTENIMIENTO"
-  },
-  {
-    "user_id": "maria.student@utec.edu.pe",
-    "password": "student123",
-    "role": "STUDENT"
-  }
+  { "user_id": "admin@utec.edu.pe", "password": "admin123", "role": "ADMIN" },
+  { "user_id": "sofia.admin2@utec.edu.pe", "password": "admin321", "role": "ADMIN" },
+  { "user_id": "admin.jorge@utec.edu.pe", "password": "jorgeadmin", "role": "ADMIN" },
+  { "user_id": "admin.camila@utec.edu.pe", "password": "camila2023", "role": "ADMIN" },
+  { "user_id": "admin.paula@utec.edu.pe", "password": "paulaUTEC", "role": "ADMIN" },
+  { "user_id": "juan.staff@utec.edu.pe", "password": "staff123", "role": "STAFF", "department": "MANTENIMIENTO" },
+  { "user_id": "carla.staff@utec.edu.pe", "password": "staff246", "role": "STAFF", "department": "SEGURIDAD" },
+  { "user_id": "pedro.tec@utec.edu.pe", "password": "staff789", "role": "STAFF", "department": "SOPORTE TECNICO" },
+  { "user_id": "laura.staff@utec.edu.pe", "password": "laura728", "role": "STAFF", "department": "LIMPIEZA" },
+  { "user_id": "mario.staff@utec.edu.pe", "password": "mariostaff", "role": "STAFF", "department": "MANTENIMIENTO" },
+  { "user_id": "luis.staff@utec.edu.pe", "password": "luisstaff", "role": "STAFF", "department": "SECRETARÍA" },
+  { "user_id": "ana.staff@utec.edu.pe", "password": "ana2468", "role": "STAFF", "department": "SEGURIDAD" },
+  { "user_id": "david.staff@utec.edu.pe", "password": "david5050", "role": "STAFF", "department": "MANTENIMIENTO" },
+  { "user_id": "sofia.staff@utec.edu.pe", "password": "sofiatec", "role": "STAFF", "department": "SOPORTE TECNICO" },
+  { "user_id": "belen.staff@utec.edu.pe", "password": "belen987", "role": "STAFF", "department": "LIMPIEZA" },
+  { "user_id": "daniel.staff@utec.edu.pe", "password": "daniel007", "role": "STAFF", "department": "SEGURIDAD" },
+  { "user_id": "marina.staff@utec.edu.pe", "password": "marinaSTAFF", "role": "STAFF", "department": "SECRETARÍA" },
+  { "user_id": "pablo.staff@utec.edu.pe", "password": "pablastaff", "role": "STAFF", "department": "MANTENIMIENTO" },
+  { "user_id": "valentina.staff@utec.edu.pe", "password": "valeSecr", "role": "STAFF", "department": "SECRETARÍA" },
+  { "user_id": "maria.student@utec.edu.pe", "password": "student123", "role": "STUDENT" },
+  { "user_id": "andres.student@utec.edu.pe", "password": "student321", "role": "STUDENT" },
+  { "user_id": "lucia.student@utec.edu.pe", "password": "student234", "role": "STUDENT" },
+  { "user_id": "sofia.student@utec.edu.pe", "password": "student456", "role": "STUDENT" },
+  { "user_id": "diego.student@utec.edu.pe", "password": "student789", "role": "STUDENT" },
+  { "user_id": "oscar.student@utec.edu.pe", "password": "oscar291", "role": "STUDENT" },
+  { "user_id": "erika.student@utec.edu.pe", "password": "erika123", "role": "STUDENT" },
+  { "user_id": "miguel.student@utec.edu.pe", "password": "miguelpass", "role": "STUDENT" },
+  { "user_id": "sol.student@utec.edu.pe", "password": "solsol21", "role": "STUDENT" },
+  { "user_id": "gustavo.student@utec.edu.pe", "password": "gustavo2023", "role": "STUDENT" },
+  { "user_id": "federico.student@utec.edu.pe", "password": "fedestudent", "role": "STUDENT" },
+  { "user_id": "camila.student@utec.edu.pe", "password": "camelatte", "role": "STUDENT" },
+  { "user_id": "mora.student@utec.edu.pe", "password": "grain2", "role": "STUDENT" }
 ]
