@@ -1,4 +1,4 @@
-org: martinbonilla
+org: asaldarriaga
 service: alertautec-backend
 
 provider:
@@ -8,11 +8,26 @@ provider:
   timeout: 30
   stage: dev
   region: us-east-1
+  environment:
+    WEBSOCKET_SERVICE_NAME: websocket-backend
+    STAGE: ${self:provider.stage}
   iam:
-    role: arn:aws:iam::492147277453:role/LabRole
+    role: arn:aws:iam::258454103606:role/LabRole
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource:
+        - arn:aws:lambda:${self:provider.region}:*:function:websocket-backend-${self:provider.stage}-*
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+        - dynamodb:GetItem
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/websocket-backend-${self:provider.stage}-connections
 
-
-    
 functions:
 
   createIncident:
@@ -23,11 +38,11 @@ functions:
           method: post
           cors: true
           authorizer:
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   listIncidents:
     handler: student/listIncidents.handler
@@ -36,11 +51,12 @@ functions:
           path: student/incidents
           method: get
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   listMine:
     handler: student/listMine.handler
@@ -49,11 +65,12 @@ functions:
           path: student/incidents/mine
           method: get
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   getIncident:
     handler: student/getIncident.handler
@@ -62,11 +79,12 @@ functions:
           path: student/incidents/{id}
           method: get
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   uploadAttachment:
     handler: student/uploadAttachment.handler
@@ -75,11 +93,12 @@ functions:
           path: student/incidents/{id}/attachments
           method: post
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   validateLocation:
     handler: student/validateLocation.handler
@@ -88,11 +107,12 @@ functions:
           path: student/incidents/validate-location
           method: post
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   previewIncident:
     handler: student/previewIncident.handler
@@ -101,11 +121,12 @@ functions:
           path: student/incidents/preview
           method: post
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   statsBasic:
     handler: student/statsBasic.handler
@@ -114,11 +135,12 @@ functions:
           path: student/incidents/stats/basic
           method: get
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
 
 
@@ -129,11 +151,12 @@ functions:
           path: staff/incidents/{id}/status
           method: put
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   addComment:
     handler: staff/addComment.handler
@@ -142,11 +165,12 @@ functions:
           path: staff/incidents/{id}/comment
           method: post
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   assignDepartment:
     handler: staff/assignDepartment.handler
@@ -155,11 +179,12 @@ functions:
           path: staff/incidents/{id}/assign
           method: post
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   listForDepartment:
     handler: staff/listForDepartment.handler
@@ -168,11 +193,12 @@ functions:
           path: staff/incidents/by-department
           method: get
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   getIncidentEvents:
     handler: staff/getIncidentEvents.handler
@@ -181,11 +207,12 @@ functions:
           path: staff/incidents/{id}/events
           method: get
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
   staffStats:
     handler: staff/staffStats.handler
@@ -194,11 +221,12 @@ functions:
           path: staff/incidents/stats
           method: get
           cors: true
-          type: COGNITO
-          userPoolArn:
-            Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
+          authorizer:
+            type: COGNITO
+            userPoolArn:
+              Fn::GetAtt:
+                - CognitoUserPool
+                - Arn
 
 resources:
   Resources:
@@ -231,27 +259,28 @@ resources:
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
-    WebSocketConnections:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: WebSocketConnections
-        AttributeDefinitions:
-          - AttributeName: user_id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: user_id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
 
     Departamentos:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: Departamentos
         AttributeDefinitions:
-          - AttributeName: department_id
+          - AttributeName: departamento_id
             AttributeType: S
         KeySchema:
-          - AttributeName: department_id
+          - AttributeName: departamento_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    WebSocketConnections:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: websocket-backend-${self:provider.stage}-connections
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
@@ -317,4 +346,3 @@ resources:
         GroupName: ADMIN
         UserPoolId:
           Ref: CognitoUserPool
-
