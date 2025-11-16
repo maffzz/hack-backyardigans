@@ -1,4 +1,4 @@
-org: martinbonilla
+org: maferlazon
 service: alertautec-backend
 
 provider:
@@ -9,7 +9,7 @@ provider:
   stage: dev
   region: us-east-1
   iam:
-    role: arn:aws:iam::492147277453:role/LabRole
+    role: arn:aws:iam::096410127560:role/LabRole
   environment:
     STAGE: ${self:provider.stage}
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
@@ -255,3 +255,27 @@ resources:
           - AttributeName: connectionId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
+    AttachmentsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-attachments-${self:provider.stage}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+
+    AttachmentsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref AttachmentsBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: PublicReadForObjects
+              Effect: Allow
+              Principal: "*"
+              Action:
+                - s3:GetObject
+              Resource: !Sub "${AttachmentsBucket.Arn}/*"
