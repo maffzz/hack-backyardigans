@@ -3,7 +3,7 @@ import boto3
 from datetime import datetime 
 import uuid
 import traceback
-from common.auth import get_user_from_request
+from common import authorize
 from common.websocket import notify_comment_added
 
 dynamodb = boto3.resource("dynamodb")
@@ -18,9 +18,11 @@ def response(code, body):
 
 def handler(event, context):
     try:
-        user = get_user_from_request(event)
-        
-        # Validar que sea staff o admin
+
+        user = authorize(event)
+        if not user:
+            return response(403, {"error": "Token inválido"})
+
         if user["role"] not in ["staff", "admin"]:
             return response(403, {"error": "Permiso denegado"})
         
@@ -38,8 +40,7 @@ def handler(event, context):
             "tipo_evento": "comentario_staff",
             "detalle": {
                 "comentario": comentario,
-                "agregado_por": user["user_id"],
-                "nombre_agregador": user["name"]
+                "agregado_por": user["user_id"]
             }
         }
         

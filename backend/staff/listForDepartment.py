@@ -1,5 +1,5 @@
 import json
-from common.auth import get_user_from_request
+from common import authorize
 import boto3
 import traceback
 
@@ -15,12 +15,17 @@ def response(code, body):
 
 def handler(event, context):
     try:
-        user = get_user_from_request(event)
+        user = authorize(event)
+        if not user:
+            return response(403, {"error": "Token inválido"})
 
         if user["role"] not in ["staff", "admin"]:
             return response(403, {"error": "No autorizado"})
 
-        dep = user["department"]
+        dep = user.get("department")
+        if not dep:
+            return response(400, {"error": "Tu usuario no tiene departamento asignado"})
+
         result = table.scan()
         items = result.get("Items", [])
 

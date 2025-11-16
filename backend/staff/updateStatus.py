@@ -2,7 +2,7 @@ import json
 import boto3
 import traceback
 from datetime import datetime
-from common.auth import get_user_from_request
+from common import authorize
 from common.websocket import notify_incident_status_changed
 from common.errors import handle_error, validate_status_change, ValidationError, NotFoundError
 
@@ -40,8 +40,13 @@ def handler(event, context):
             f"Estado inválido. Valores válidos: {', '.join(valid_statuses)}",
             "estado"
         )
-    
-    user = get_user_from_request(event)
+
+    user = authorize(event)
+    if not user:
+        raise ValidationError("Token inválido")
+
+    if user["role"] not in ["staff", "admin"]:
+        raise ValidationError("No autorizado")
     
     # Validar que sea staff o admin
     if user["role"] not in ["staff", "admin"]:
@@ -82,8 +87,7 @@ def handler(event, context):
         "detalles": {
             "anterior": current_status,
             "nuevo": new_status,
-            "actualizado_por": user["user_id"],
-            "nombre_usuario": user["name"]
+            "actualizado_por": user["user_id"]
         },
         "timestamp": datetime.utcnow().isoformat()
     }

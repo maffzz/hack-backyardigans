@@ -17,7 +17,11 @@ def response(code, body):
 
 def handler(event, context):
     try:
-        reporter_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+        user = authorize(event)
+        if not user:
+            return response(403, {"error": "Token inválido"})
+
+        reporter_id = user["user_id"]
 
         result = table.scan()
         mine = [x for x in result.get("Items", []) if x.get("reporter_id") == reporter_id]

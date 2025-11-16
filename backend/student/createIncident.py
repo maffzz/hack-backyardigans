@@ -4,6 +4,7 @@ import uuid
 import traceback
 from datetime import datetime
 from common.websocket import notify_incident_created
+from common import authorize
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")   # TABLA REAL
@@ -33,7 +34,11 @@ def handler(event, context):
         if missing:
             return response(400, {"error": f"Faltan campos: {', '.join(missing)}"})
 
-        reporter_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+        user = authorize(event)
+        if not user:
+            return response(403, {"error": "Token inválido"})
+
+        reporter_id = user["user_id"]
 
         item = {
             "incident_id": str(uuid.uuid4()),

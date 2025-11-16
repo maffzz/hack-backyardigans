@@ -17,6 +17,10 @@ def response(code, body):
 
 def handler(event, context):
     try:
+        user = authorize(event)
+        if not user:
+            return response(403, {"error": "Token inválido"})
+
         incident_id = event["pathParameters"]["id"]
 
         result = table.get_item(Key={"incident_id": incident_id})
