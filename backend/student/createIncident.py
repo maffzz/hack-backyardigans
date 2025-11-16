@@ -2,7 +2,6 @@ import boto3
 import uuid
 from datetime import datetime
 from common.websocket import notify_incident_created
-from common.email import notify_incident_by_email
 from common.authorize import authorize
 
 dynamodb = boto3.resource("dynamodb")
@@ -53,11 +52,8 @@ def handler(event, context):
         
         table.put_item(Item=item)
         
-        # Notificar WebSocket (tiempo real)
+        # Notificar WebSocket
         notify_incident_created(item)
-        
-        # Notificar por email (asíncrono según urgencia)
-        notify_incident_by_email(item, reporter_id)
         
         # Salida (json)
         return {
