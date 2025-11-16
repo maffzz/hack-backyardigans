@@ -1,4 +1,3 @@
-import json
 import boto3
 import traceback
 from common.response import response
