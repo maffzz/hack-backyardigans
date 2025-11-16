@@ -260,9 +260,7 @@ De esta forma, Airflow se convierte en el **cerebro batch** que analiza los inci
 
 ---
 
-## 7. Para la demo / pitch
-
-En la presentación puedes resaltar:
+## 7. Puntos importantes
 
 - **Arquitectura serverless completa**:
   - Backend en Lambdas + DynamoDB + S3.
@@ -277,4 +275,3 @@ En la presentación puedes resaltar:
   - Orquestación desacoplada en Airflow, que se puede extender con nuevas tareas (correos, ML, etc.).
 
 AlertaUTEC no solo resuelve el problema de reportar incidentes, sino que también **estructura el flujo de comunicación y análisis**, dejando lista una base sólida para seguir creciendo en producción.
-
