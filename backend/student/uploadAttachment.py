@@ -1,30 +1,27 @@
 import json
+import os
 import boto3
 import base64
 import uuid
 import traceback
+from common.response import response
 
 s3 = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")
 
-BUCKET = "BUCKET......"   
-
-def response(code, body):
-    return {
-        "statusCode": code,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": body
-    }
+BUCKET = os.environ.get("S3_BUCKET", "alertautec-attachments")
 
 def handler(event, context):
     try:
-        incident_id = event["pathParameters"]["id"]
+        path_params = event.get("pathParameters") or {}
+        incident_id = path_params.get("id")
+        if not incident_id:
+            return response(400, {"error": "ID de incidente requerido"})
 
         body = event.get("body")
+        if isinstance(body, str):
+            body = json.loads(body)
 
 
         if "file" not in body or "filename" not in body:

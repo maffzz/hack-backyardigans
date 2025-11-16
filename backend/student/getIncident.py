@@ -2,6 +2,7 @@ import json
 import boto3
 import traceback
 from decimal import Decimal
+from common.response import response
 from common.authorize import authorize
 
 dynamodb = boto3.resource("dynamodb")
@@ -36,7 +37,10 @@ def handler(event, context):
         if not user:
             return response(403, {"error": "Token inválido"})     
 
-        incident_id = event["pathParameters"]["id"]
+        path_params = event.get("pathParameters") or {}
+        incident_id = path_params.get("id")
+        if not incident_id:
+            return response(400, {"error": "ID de incidente requerido"})
 
         result = table.get_item(Key={"incident_id": incident_id})  
 

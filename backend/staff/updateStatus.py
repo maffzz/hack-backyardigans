@@ -2,6 +2,7 @@ import json
 import boto3
 import traceback
 from datetime import datetime
+from common.response import response
 from common.authorize import authorize
 from common.websocket import notify_incident_status_changed
 from common.errors import handle_error, validate_status_change, ValidationError, NotFoundError
@@ -9,16 +10,6 @@ from common.errors import handle_error, validate_status_change, ValidationError,
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")
 events_table = dynamodb.Table("IncidenteEventos")
-
-def response(code, body):
-    return {
-        "statusCode": code,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": json.dumps(body) if isinstance(body, dict) else body
-    }
 
 @handle_error
 def handler(event, context):

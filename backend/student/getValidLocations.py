@@ -1,5 +1,7 @@
 import json
+from common.response import response
 from common.locations import get_valid_locations
+
 
 def response(code, body):
     if isinstance(body, dict):
@@ -17,6 +19,7 @@ def response(code, body):
         },
         "body": body_str
     }
+
 
 def handler(event, context):
     try:

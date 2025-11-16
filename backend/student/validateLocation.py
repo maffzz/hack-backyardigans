@@ -1,14 +1,5 @@
 import json
-
-def response(code, body):
-    return {
-        "statusCode": code,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": body
-    }
+from common.response import response
 
 VALID = {
     "1": list(range(1, 12)),  
@@ -18,6 +9,8 @@ VALID = {
 def handler(event, context):
     try:
         body = event.get("body")
+        if isinstance(body, str):
+            body = json.loads(body)
 
         edificio = body.get("edificio")
         piso = body.get("piso")

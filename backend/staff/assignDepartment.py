@@ -1,4 +1,5 @@
 import json
+from common.response import response
 from common.authorize import authorize
 import boto3
 from datetime import datetime
@@ -9,13 +10,6 @@ from common.websocket import notify_department_assigned
 dynamodb = boto3.resource("dynamodb")
 table_inc = dynamodb.Table("Incidentes")
 table_evt = dynamodb.Table("IncidenteEventos")
-
-def response(code, body):
-    return {
-        "statusCode": code,
-        "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(body) if isinstance(body, dict) else body
-    }
 
 def handler(event, context):
     try:
