@@ -10,8 +10,9 @@ def hash_password(password):
 
 def lambda_handler(event, context):
     # Entrada (json)
-    user_id = event.get('user_id')
-    password = event.get('password')
+    body = event.get('body', {})
+    user_id = body.get('user_id')
+    password = body.get('password')
     
     # Validar campos requeridos
     if not user_id or not password:
@@ -65,8 +66,9 @@ def lambda_handler(event, context):
     # Salida (json)
     return {
         'statusCode': 200,
-        'token': token,
-        'role': user.get('role', 'student'),
-        'department': user.get('department')
+        'body': {
+            'token': token,
+            'role': user.get('role', 'student'),
+            'department': user.get('department')
+        }
     }
-    

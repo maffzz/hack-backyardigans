@@ -6,44 +6,43 @@ def hash_password(password):
 
 def lambda_handler(event, context):
     try:
-        user_id = event.get("user_id")
-        password = event.get("password")
-        role = event.get("role")
-        department = event.get("department")
-
+        body = event.get("body", {})
+        
+        user_id = body.get("user_id")
+        password = body.get("password")
+        role = body.get("role")
+        department = body.get("department")
+        
         if not user_id or not password or not role:
-            message = {
-                'error': 'Invalid request body: missing user_id or password'
-            }
             return {
                 'statusCode': 400,
-                'body': message
+                'body': {
+                    'error': 'Invalid request body: missing user_id or password'
+                }
             }
-
+        
         dynamodb = boto3.resource("dynamodb")
         table = dynamodb.Table("Users")
-
+        
         table.put_item(Item={
             "user_id": user_id,
             "password": hash_password(password),
             "role": role,
             "department": department if department else None
         })
-
-        message = {
-            'message': 'User registered successfully',
-            'user_id': user_id
-        }
+        
         return {
             'statusCode': 200,
-            'body': message
+            'body': {
+                'message': 'User registered successfully',
+                'user_id': user_id
+            }
         }
-
+        
     except Exception as e:
-        message = {
-            'error': str(e)
-        }        
         return {
             'statusCode': 500,
-            'body': message
+            'body': {
+                'error': str(e)
+            }
         }

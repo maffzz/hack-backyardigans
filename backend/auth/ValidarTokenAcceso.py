@@ -2,7 +2,8 @@ import boto3
 from datetime import datetime
 
 def lambda_handler(event, context):
-    token = event['token']
+    body = event.get("body", {})
+    token = body.get('token')
     
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table("Tokens")
