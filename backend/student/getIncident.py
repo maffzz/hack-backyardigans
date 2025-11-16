@@ -13,6 +13,10 @@ def handler(event, context):
         if not user:
             return {
                 'statusCode': 403,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                },
                 'body': json.dumps({
                     'error': 'Token inválido'
                 })
@@ -24,6 +28,10 @@ def handler(event, context):
         if not incident_id:
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                },
                 'body': json.dumps({
                     'error': 'ID de incidente requerido'
                 })
@@ -34,6 +42,10 @@ def handler(event, context):
         if "Item" not in result:
             return {
                 'statusCode': 404,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                },
                 'body': json.dumps({
                     'error': 'Incidente no encontrado'
                 })
@@ -43,6 +55,10 @@ def handler(event, context):
 
         return {
             'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json'
+            },
             'body': json.dumps({
                 'data': item
             })
@@ -52,6 +68,10 @@ def handler(event, context):
         traceback.print_exc()
         return {
             'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json'
+            },
             'body': json.dumps({
                 'error': str(e)
             })
