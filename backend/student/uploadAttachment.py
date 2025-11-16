@@ -36,7 +36,12 @@ def handler(event, context):
             Body=file_data
         )
 
-        file_url = f"https://{BUCKET}.s3.amazonaws.com/{filename}"
+        # Construir URL del archivo en S3
+        region = os.environ.get('AWS_REGION', 'us-east-1')
+        if region == 'us-east-1':
+            file_url = f"https://{BUCKET}.s3.amazonaws.com/{filename}"
+        else:
+            file_url = f"https://{BUCKET}.s3.{region}.amazonaws.com/{filename}"
 
         table.update_item(
             Key={"incident_id": incident_id},

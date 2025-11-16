@@ -12,6 +12,7 @@ provider:
     role: arn:aws:iam::258454103606:role/LabRole
   environment:
     STAGE: ${self:provider.stage}
+    S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
 
 functions:
 
@@ -24,7 +25,7 @@ functions:
           path: auth/register
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   GenerateToken:
     handler: auth/GenerateTokenAcceso.lambda_handler
@@ -33,7 +34,7 @@ functions:
           path: auth/login
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   ValidarTokenAcceso:
     handler: auth/ValidarTokenAcceso.lambda_handler
@@ -48,7 +49,7 @@ functions:
           path: student/incidents
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   listIncidents:
     handler: student/listIncidents.handler
@@ -57,7 +58,7 @@ functions:
           path: student/incidents
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   listMine:
     handler: student/listMine.handler
@@ -66,7 +67,7 @@ functions:
           path: student/incidents/mine
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   getIncident:
     handler: student/getIncident.handler
@@ -75,7 +76,7 @@ functions:
           path: student/incidents/{id}
           method: get
           cors: true
-          integration: lambda-proxy
+          integration: lambda-proxy-proxy
 
   uploadAttachment:
     handler: student/uploadAttachment.handler
@@ -84,7 +85,7 @@ functions:
           path: student/incidents/{id}/attachments
           method: post
           cors: true
-          integration: lambda-proxy
+          integration: lambda-proxy-proxy
 
   validateLocation:
     handler: student/validateLocation.handler
@@ -93,7 +94,7 @@ functions:
           path: student/incidents/validate-location
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   previewIncident:
     handler: student/previewIncident.handler
@@ -102,7 +103,7 @@ functions:
           path: student/incidents/preview
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   statsBasic:
     handler: student/statsBasic.handler
@@ -111,7 +112,7 @@ functions:
           path: student/incidents/stats/basic
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
 
   # --- STAFF / ADMIN ---
@@ -123,7 +124,7 @@ functions:
           path: staff/incidents/{id}/status
           method: put
           cors: true
-          integration: lambda-proxy
+          integration: lambda-proxy-proxy
 
   addComment:
     handler: staff/addComment.handler
@@ -132,7 +133,7 @@ functions:
           path: staff/incidents/{id}/comment
           method: post
           cors: true
-          integration: lambda-proxy
+          integration: lambda-proxy-proxy
 
   assignDepartment:
     handler: staff/assignDepartment.handler
@@ -141,7 +142,7 @@ functions:
           path: staff/incidents/{id}/assign
           method: post
           cors: true
-          integration: lambda-proxy
+          integration: lambda-proxy-proxy
 
   listForDepartment:
     handler: staff/listForDepartment.handler
@@ -150,7 +151,7 @@ functions:
           path: staff/incidents/by-department
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   getIncidentEvents:
     handler: staff/getIncidentEvents.handler
@@ -159,7 +160,7 @@ functions:
           path: staff/incidents/{id}/events
           method: get
           cors: true
-          integration: lambda-proxy
+          integration: lambda-proxy-proxy
 
   staffStats:
     handler: staff/staffStats.handler
@@ -168,7 +169,7 @@ functions:
           path: staff/incidents/stats
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
 
 resources:
@@ -254,3 +255,39 @@ resources:
           - AttributeName: connectionId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
+    # --- S3 BUCKET FOR ATTACHMENTS ---
+
+    AttachmentsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-attachments-${self:provider.stage}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - HEAD
+              AllowedOrigins:
+                - "*"
+              MaxAge: 3000
+
+    AttachmentsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref AttachmentsBucket
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource: !Sub "${AttachmentsBucket}/*"

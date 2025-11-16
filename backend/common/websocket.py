@@ -28,7 +28,7 @@ def _invoke_function(function_name: str, payload: dict) -> None:
         response = lambda_client.invoke(
             FunctionName=full_function_name,
             InvocationType="Event",  # Asíncrono, no espera respuesta
-            Payload=payload
+            Payload=json.dumps(payload)
         )
         print(f"Invocada función {full_function_name}, StatusCode: {response['StatusCode']}")
     except Exception as e:
