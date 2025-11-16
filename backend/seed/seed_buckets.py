@@ -41,7 +41,7 @@ def seed_attachments(incidents):
             continue
 
         for i in range(1, 6):  # 5 archivos por incidente
-            key = f"{incident_id}/seed_foto_{i}.txt"
+            key = f"{incident_id}/seed_foto_{i}.jpg"
             body = (
                 f"Incidente {incident_id}\n"\
                 f"Archivo simulado #{i}\n"\
