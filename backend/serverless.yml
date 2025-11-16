@@ -154,6 +154,15 @@ functions:
           cors: true
           integration: lambda
 
+  getDepartmentIncidents:
+    handler: staff/getDepartmentIncidents.handler
+    events:
+      - http:
+          path: staff/incidents/department
+          method: post
+          cors: true
+          integration: lambda-proxy
+
   getIncidentEvents:
     handler: staff/getIncidentEvents.handler
     events:
