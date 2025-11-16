@@ -2,7 +2,7 @@ import json
 import boto3
 import traceback
 from datetime import datetime
-from common import authorize
+from common.authorize import authorize
 from common.websocket import notify_incident_status_changed
 from common.errors import handle_error, validate_status_change, ValidationError, NotFoundError
 

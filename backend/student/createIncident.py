@@ -4,7 +4,7 @@ import uuid
 import traceback
 from datetime import datetime
 from common.websocket import notify_incident_created
-from common import authorize
+from common.authorize import authorize
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")   # TABLA REAL

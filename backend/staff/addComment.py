@@ -3,7 +3,7 @@ import boto3
 from datetime import datetime 
 import uuid
 import traceback
-from common import authorize
+from common.authorize import authorize
 from common.websocket import notify_comment_added
 
 dynamodb = boto3.resource("dynamodb")

@@ -1,7 +1,7 @@
 import json
 import boto3
 import traceback
-from common import authorize
+from common.authorize import authorize
 from common.database import DatabaseHelper
 
 def response(code, body):

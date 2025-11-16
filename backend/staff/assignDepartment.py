@@ -1,5 +1,5 @@
 import json
-from common import authorize
+from common.authorize import authorize
 import boto3
 from datetime import datetime
 import uuid
