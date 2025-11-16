@@ -22,6 +22,12 @@ functions:
           path: student/incidents
           method: post
           cors: true
+          authorizer:
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   listIncidents:
     handler: student/listIncidents.handler
@@ -30,6 +36,11 @@ functions:
           path: student/incidents
           method: get
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   listMine:
     handler: student/listMine.handler
@@ -38,6 +49,11 @@ functions:
           path: student/incidents/mine
           method: get
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   getIncident:
     handler: student/getIncident.handler
@@ -46,6 +62,11 @@ functions:
           path: student/incidents/{id}
           method: get
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   uploadAttachment:
     handler: student/uploadAttachment.handler
@@ -54,6 +75,11 @@ functions:
           path: student/incidents/{id}/attachments
           method: post
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   validateLocation:
     handler: student/validateLocation.handler
@@ -62,6 +88,11 @@ functions:
           path: student/incidents/validate-location
           method: post
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   previewIncident:
     handler: student/previewIncident.handler
@@ -70,6 +101,11 @@ functions:
           path: student/incidents/preview
           method: post
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   statsBasic:
     handler: student/statsBasic.handler
@@ -78,6 +114,11 @@ functions:
           path: student/incidents/stats/basic
           method: get
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
 
 
@@ -88,6 +129,11 @@ functions:
           path: staff/incidents/{id}/status
           method: put
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   addComment:
     handler: staff/addComment.handler
@@ -96,6 +142,11 @@ functions:
           path: staff/incidents/{id}/comment
           method: post
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   assignDepartment:
     handler: staff/assignDepartment.handler
@@ -104,6 +155,11 @@ functions:
           path: staff/incidents/{id}/assign
           method: post
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   listForDepartment:
     handler: staff/listForDepartment.handler
@@ -112,6 +168,11 @@ functions:
           path: staff/incidents/by-department
           method: get
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   getIncidentEvents:
     handler: staff/getIncidentEvents.handler
@@ -120,6 +181,11 @@ functions:
           path: staff/incidents/{id}/events
           method: get
           cors: true
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
   staffStats:
     handler: staff/staffStats.handler
@@ -128,8 +194,11 @@ functions:
           path: staff/incidents/stats
           method: get
           cors: true
-
-
+          type: COGNITO
+          userPoolArn:
+            Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
 
 resources:
   Resources:
