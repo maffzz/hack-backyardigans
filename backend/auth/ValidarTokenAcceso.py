@@ -52,7 +52,7 @@ def lambda_handler(event, context):
             'statusCode': 200,
             'body': {
                 "user_id": item["user_id"],
-                "role": item["role"],
+                "role": item["role"].lower(),
                 "department": item.get("department")
             }
         }
