@@ -1,7 +1,7 @@
 import json
 import requests
 
-API = "https://<tu-api-id>.execute-api.us-east-1.amazonaws.com/dev"
+API = "https://4f7f6il2j5.execute-api.us-east-1.amazonaws.com/dev"
 
 # Usuarios
 with open("seed_users.json") as f:
