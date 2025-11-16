@@ -9,8 +9,11 @@ import boto3
 # Nombre del servicio websocket-backend (debe coincidir con el serverless.yml)
 WEBSOCKET_SERVICE_NAME = os.environ.get("WEBSOCKET_SERVICE_NAME", "websocket-backend")
 STAGE = os.environ.get("STAGE", "dev")
-# En Lambda, AWS_REGION está disponible automáticamente, sino usar la región por defecto
-REGION = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
+
+# En Lambda, AWS_REGION está disponible automáticamente como variable de entorno del sistema
+# No la definimos manualmente porque es reservada
+# Si no está disponible (desarrollo local), usar la región por defecto
+REGION = os.environ.get("AWS_REGION", "us-east-1")
 
 lambda_client = boto3.client("lambda", region_name=REGION)
 
