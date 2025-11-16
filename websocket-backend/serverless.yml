@@ -1,4 +1,4 @@
-org: hack-ganadora # REEMPLAZAR
+org: asaldarriaga
 service: websocket-backend
 
 provider:
@@ -41,17 +41,3 @@ functions:
     events:
       - websocket:
           route: $default
-
-resources:
-  Resources:
-    ConnectionsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.CONNECTIONS_TABLE}
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: connectionId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: connectionId
-            KeyType: HASH
