@@ -8,15 +8,28 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")
 
 def handler(event, context):
+    # CORS headers
+    cors_headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Access-Control-Allow-Methods': 'GET,OPTIONS',
+        'Content-Type': 'application/json'
+    }
+    
+    # Handle OPTIONS preflight
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': cors_headers,
+            'body': json.dumps({'message': 'OK'})
+        }
+    
     try:
         user = authorize(event)
         if not user:
             return {
                 'statusCode': 403,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Content-Type': 'application/json'
-                },
+                'headers': cors_headers,
                 'body': json.dumps({
                     'error': 'Token inválido'
                 })
@@ -28,10 +41,7 @@ def handler(event, context):
         if not incident_id:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Content-Type': 'application/json'
-                },
+                'headers': cors_headers,
                 'body': json.dumps({
                     'error': 'ID de incidente requerido'
                 })
@@ -42,10 +52,7 @@ def handler(event, context):
         if "Item" not in result:
             return {
                 'statusCode': 404,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Content-Type': 'application/json'
-                },
+                'headers': cors_headers,
                 'body': json.dumps({
                     'error': 'Incidente no encontrado'
                 })
@@ -55,10 +62,7 @@ def handler(event, context):
 
         return {
             'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json'
-            },
+            'headers': cors_headers,
             'body': json.dumps({
                 'data': item
             })
@@ -68,10 +72,7 @@ def handler(event, context):
         traceback.print_exc()
         return {
             'statusCode': 500,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json'
-            },
+            'headers': cors_headers,
             'body': json.dumps({
                 'error': str(e)
             })
