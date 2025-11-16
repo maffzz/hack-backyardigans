@@ -15,6 +15,7 @@ events_table = dynamodb.Table("IncidenteEventos")
 def handler(event, context):
     path_params = event.get("pathParameters") or {}
     incident_id = path_params.get("id")
+    
     if not incident_id:
         raise ValidationError("ID de incidente requerido")
     
@@ -26,7 +27,6 @@ def handler(event, context):
             raise ValidationError("Body JSON inválido")
     
     new_status = body.get("estado")
-    
     if not new_status:
         raise ValidationError("El campo 'estado' es requerido", "estado")
     
@@ -36,19 +36,18 @@ def handler(event, context):
             f"Estado inválido. Valores válidos: {', '.join(valid_statuses)}",
             "estado"
         )
-
+    
     user = authorize(event)
     if not user:
         raise ValidationError("Token inválido")
-
+    
     if user["role"] not in ["staff", "admin"]:
         raise ValidationError("Solo staff o admin pueden actualizar estados")
     
-    # Obtener incidente actual
+    # Obtener incidente actual - CAMBIO AQUÍ: usar otro nombre de variable
     try:
-        response = table.get_item(Key={"incident_id": incident_id})
-        incident = response.get("Item")
-        
+        result = table.get_item(Key={"incident_id": incident_id})
+        incident = result.get("Item")
         if not incident:
             raise NotFoundError("Incidente", incident_id)
     except Exception as e:
@@ -83,7 +82,6 @@ def handler(event, context):
         },
         "timestamp": datetime.utcnow().isoformat()
     }
-    
     events_table.put_item(Item=event_item)
     
     # Notificar via WebSocket
