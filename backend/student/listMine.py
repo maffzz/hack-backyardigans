@@ -1,6 +1,7 @@
 import json
 import boto3
 import traceback
+from common.auth import require_auth
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")
@@ -15,11 +16,10 @@ def response(code, body):
         "body": json.dumps(body)
     }
 
+@require_auth
 def handler(event, context):
     try:
-        user = authorize(event)
-        if not user:
-            return response(403, {"error": "Token inválido"})
+        user = event["user"]
 
         reporter_id = user["user_id"]
 

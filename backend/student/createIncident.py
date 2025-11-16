@@ -4,7 +4,7 @@ import uuid
 import traceback
 from datetime import datetime
 from common.websocket import notify_incident_created
-from common import authorize
+from common.auth import require_role
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")   # TABLA REAL
@@ -19,9 +19,12 @@ def response(code, body):
         "body": json.dumps(body)
     }
 
+@require_role(["student"])
 def handler(event, context):
     try:
         print("EVENT:", json.dumps(event))
+        
+        user = event["user"]
 
         try:
             body = json.loads(event.get("body") or "{}")
@@ -34,15 +37,9 @@ def handler(event, context):
         if missing:
             return response(400, {"error": f"Faltan campos: {', '.join(missing)}"})
 
-        user = authorize(event)
-        if not user:
-            return response(403, {"error": "Token inválido"})
-
-        reporter_id = user["user_id"]
-
         item = {
             "incident_id": str(uuid.uuid4()),
-            "reporter_id": reporter_id,
+            "reporter_id": user["user_id"],
             "tipo": body["tipo"],
             "descripcion": body["descripcion"],
             "ubicacion": body["ubicacion"],

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Authentication Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .result { margin-top: 10px; padding: 10px; background: #f5f5f5; white-space: pre-wrap; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>JWT Authentication Test - AlertaUTEC</h1>
+    
+    <div class="section">
+        <h2>1. Login (Generate Token)</h2>
+        <input type="text" id="userId" placeholder="User ID" value="test_student">
+        <input type="password" id="password" placeholder="Password" value="password123">
+        <button onclick="login()">Login</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Test Protected Endpoints</h2>
+        <button onclick="testStudentEndpoint()">Test Student Endpoint</button>
+        <button onclick="testStaffEndpoint()">Test Staff Endpoint</button>
+        <div id="endpointResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Token Info</h2>
+        <div id="tokenInfo" class="result">No token available</div>
+    </div>
+
+    <script>
+        let currentToken = null;
+        const API_BASE = 'https://your-api-gateway-url'; // Replace with actual API URL
+
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${isError ? 'error' : 'success'}`;
+        }
+
+        function updateTokenInfo() {
+            const tokenInfo = document.getElementById('tokenInfo');
+            if (!currentToken) {
+                tokenInfo.textContent = 'No token available';
+                return;
+            }
+
+            try {
+                // Decode JWT payload (without verification for display)
+                const payload = JSON.parse(atob(currentToken.split('.')[1]));
+                tokenInfo.textContent = JSON.stringify(payload, null, 2);
+                tokenInfo.className = 'result success';
+            } catch (e) {
+                tokenInfo.textContent = 'Invalid token format';
+                tokenInfo.className = 'result error';
+            }
+        }
+
+        async function login() {
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // This would normally call your GenerateTokenAcceso endpoint
+                // For testing, we'll simulate a successful login
+                const mockResponse = {
+                    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdF9zdHVkZW50Iiwicm9sZSI6InN0dWRlbnQiLCJkZXBhcnRtZW50IjpudWxsLCJlbWFpbCI6InN0dWRlbnRAZXhhbXBsZS5jb20iLCJuYW1lIjoiVGVzdCBTdHVkZW50IiwiZXhwIjo3NjE2MDM1MjAwfQ.mock_signature',
+                    role: 'student',
+                    department: null
+                };
+
+                currentToken = mockResponse.token;
+                showResult('loginResult', `Login successful! Token: ${currentToken.substring(0, 50)}...`, false);
+                updateTokenInfo();
+
+            } catch (error) {
+                showResult('loginResult', `Login failed: ${error.message}`, true);
+            }
+        }
+
+        async function testStudentEndpoint() {
+            if (!currentToken) {
+                showResult('endpointResult', 'Please login first', true);
+                return;
+            }
+
+            try {
+                // Test student endpoint
+                const response = await fetch(`${API_BASE}/student/listMine`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                showResult('endpointResult', `Student Endpoint Test (${response.status}):\n${JSON.stringify(result, null, 2)}`, response.status >= 400);
+
+            } catch (error) {
+                showResult('endpointResult', `Student endpoint error: ${error.message}`, true);
+            }
+        }
+
+        async function testStaffEndpoint() {
+            if (!currentToken) {
+                showResult('endpointResult', 'Please login first', true);
+                return;
+            }
+
+            try {
+                // Test staff endpoint (should fail for student token)
+                const response = await fetch(`${API_BASE}/staff/listForDepartment`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                showResult('endpointResult', `Staff Endpoint Test (${response.status}):\n${JSON.stringify(result, null, 2)}`, response.status >= 400);
+
+            } catch (error) {
+                showResult('endpointResult', `Staff endpoint error: ${error.message}`, true);
+            }
+        }
+
+        // Initialize
+        updateTokenInfo();
+    </script>
+</body>
+</html>

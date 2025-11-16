@@ -1,5 +1,5 @@
 import json
-from common import authorize
+from common.auth import require_role
 import boto3
 from datetime import datetime
 import uuid
@@ -17,15 +17,10 @@ def response(code, body):
         "body": json.dumps(body)
     }
 
+@require_role(["staff", "authority"])
 def handler(event, context):
     try:
-        incident_id = event["pathParameters"]["id"]
-        body = json.loads(event["body"])
-
-
-        user = authorize(event)
-        if not user:
-            return response(403, {"error": "Token inválido"})
+        user = event["user"]
 
         if user["role"] not in ["staff", "admin"]:
             return response(403, {"error": "No autorizado"})

@@ -1,4 +1,5 @@
 import json
+from common.auth import require_auth
 import boto3
 import traceback
 
@@ -15,11 +16,10 @@ def response(code, body):
         "body": json.dumps(body)
     }
 
+@require_auth
 def handler(event, context):
     try:
-        user = authorize(event)
-        if not user:
-            return response(403, {"error": "Token inválido"})
+        user = event["user"]
 
         incident_id = event["pathParameters"]["id"]
 

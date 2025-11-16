@@ -1,8 +1,9 @@
 import boto3
 import json
 import hashlib
-import uuid
+import jwt
 from datetime import datetime, timedelta
+from common.auth import generate_jwt_token
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -25,16 +26,13 @@ def lambda_handler(event, context):
     if user["password"] != hash_password(password):
         return {"statusCode": 403, "body": "Invalid credentials"}
 
-    token = str(uuid.uuid4())
-    expires = (datetime.utcnow() + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
-
-    tokens = dynamodb.Table("Tokens")
-    tokens.put_item(Item={
-        "token": token,
+    # Generate JWT token instead of UUID
+    token = generate_jwt_token({
         "user_id": user_id,
         "role": user["role"],
         "department": user.get("department"),
-        "expires": expires
+        "email": user.get("email"),
+        "name": user.get("name", "")
     })
 
     return {

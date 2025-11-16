@@ -1,7 +1,7 @@
 import json
 import boto3
 import traceback
-from common import authorize
+from common.auth import require_auth
 from common.database import DatabaseHelper
 
 def response(code, body):
@@ -11,11 +11,10 @@ def response(code, body):
         "body": json.dumps(body)
     }
 
+@require_auth
 def handler(event, context):
     try:
-        user = authorize(event)
-        if not user:
-            return response(403, {"error": "Token inválido"})
+        user = event["user"]
 
         if user["role"] not in ["staff", "admin"]:
             return response(403, {"error": "Permiso denegado"})
