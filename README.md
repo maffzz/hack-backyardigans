@@ -1,20 +1,22 @@
 
-# AlertaUTEC – Plataforma de gestión de incidentes en campus
+# 🚨 AlertaUTEC – Plataforma de gestión de incidentes en campus
 
 AlertaUTEC es una plataforma para **reportar, gestionar y monitorear incidentes** dentro del campus de UTEC.
 
-Combina un backend **serverless en AWS** (Lambdas + DynamoDB + S3 + API Gateway REST/WebSocket) con un componente de **orquestación batch en Apache Airflow sobre ECS Fargate**, que genera reportes y dispara notificaciones automáticas a los departamentos.
+Combina un backend **serverless en AWS** (Lambdas + DynamoDB + S3 + API Gateway REST/WebSocket) con un componente de **orquestación batch en Apache Airflow** (corriendo en EC2 con Docker Compose, y desplegable en ECS Fargate), que genera reportes y dispara notificaciones automáticas a los departamentos. Además, se integra con **Amazon SageMaker** para análisis predictivo y modelos de ML entrenados sobre los incidentes históricos.
 
 Este README resume:
 
 - Qué problema resuelve la app.
 - Cómo está dividida en microservicios.
 - Cómo funciona la capa de WebSockets en tiempo real.
-- Cómo Airflow orquesta procesos sobre los datos de DynamoDB.
+- Cómo Airflow orquesta procesos sobre los datos de DynamoDB y genera reportes en S3.
+- Cómo SageMaker analiza los incidentes y expone un endpoint de predicción.
+- Cómo probar todo con la colección de Postman incluida en el repo.
 
 ---
 
-## 1. Problema que resolvemos
+## 1. 🎯 Problema que resolvemos
 
 En el campus se producen incidentes de todo tipo (infraestructura, seguridad, etc.). Hoy se reportan de forma desordenada, sin trazabilidad ni notificaciones claras a los departamentos responsables.
 
@@ -29,7 +31,7 @@ En el campus se producen incidentes de todo tipo (infraestructura, seguridad, et
 
 ---
 
-## 2. Arquitectura general
+## 2. 🧱 Arquitectura general
 
 La solución está dividida en varios componentes:
 
@@ -50,7 +52,7 @@ La solución está dividida en varios componentes:
   - Consume las APIs REST.
   - Se conecta al WebSocket para recibir notificaciones en tiempo real.
 
-### 2.1. Recursos principales en AWS
+### 2.1. ☁️ Recursos principales en AWS
 
 - **DynamoDB**
   - `Users` – usuarios de la plataforma.
@@ -78,9 +80,9 @@ La solución está dividida en varios componentes:
 
 ---
 
-## 3. Microservicios / módulos del backend
+## 3. 🧩 Microservicios / módulos del backend
 
-### 3.1. Autenticación – `backend/auth/*`
+### 3.1. 🔐 Autenticación – `backend/auth/*`
 
 - **`RegisterUser`**
   - Registro de nuevos usuarios en la tabla `Users`.
@@ -92,7 +94,7 @@ La solución está dividida en varios componentes:
   - Endpoint interno usado por `common/authorize.py`.
   - Valida el token que viene en los headers de cada petición.
 
-### 3.2. Student – `backend/student/*`
+### 3.2. 🎓 Student – `backend/student/*`
 
 - **`createIncident`**
   - Recibe los datos del incidente desde el frontend.
@@ -109,7 +111,7 @@ La solución está dividida en varios componentes:
 - **`validateLocation` / `previewIncident` / `statsBasic`**
   - Validaciones y estadísticas básicas de uso (recuentos por estado, etc.).
 
-### 3.3. Staff / Admin – `backend/staff/*`
+### 3.3. 🛠️ Staff / Admin – `backend/staff/*`
 
 - **`updateStatus`**
   - Cambia el estado de un incidente (p. ej. `pendiente → en_proceso → resuelto`).
@@ -125,22 +127,29 @@ La solución está dividida en varios componentes:
   - Actualiza el campo `departamento` en `Incidentes`.
   - Registra un evento de tipo `asignacion` en `IncidenteEventos` con `detalle.departamento`.
   - Notifica por WebSocket (`notify_department_assigned`).
+  - **Genera un reporte individual** del incidente asignado en S3.
+  - **Invoca la Lambda `notifyDepartmentIncident`** inmediatamente para notificar al departamento.
 
-- **`listForDepartment`**
-  - Lista incidentes filtrados por departamento asignado.
+- **`listByDepartment`**
+  - Lista incidentes filtrados por departamento asignado (usado por el panel de staff).
 
-- **`getIncidentEvents` / `staffStats`**
+-- **`getIncidentEvents` / `staffStats`**
   - Historial de eventos por incidente y estadísticas para staff.
 
-- **`notifyDepartmentIncident`** (nuevo)
-  - Lambda pensada para ser invocada desde Airflow.
+- **`notifyDepartmentIncident`** (mejorada)
+  - Lambda pensada para ser invocada desde Airflow **y** desde el backend cuando se asigna un departamento.
   - Input: `incident_id`, `departamento`, `s3_bucket`, `s3_key`.
-  - Lee el incidente en `Incidentes`.
-  - Verifica que el objeto S3 con el reporte exista.
-  - Registra en logs la “notificación” hacia el departamento.
-  - Lista para integrar SES / SNS en el futuro.
+  - Lee el incidente en `Incidentes` y valida que el reporte exista en S3.
+  - Publica un mensaje en **SNS** usando el topic `IncidentNotificationsTopic` (configurado en `serverless.yml`).
+  - Envía un correo a los responsables del departamento (vía SNS), incluyendo resumen del incidente y link directo al reporte en S3.
+  - Loggea el resultado (incluyendo si el email fue enviado correctamente).
 
-### 3.4. WebSocket backend – `backend/websocket-backend/*`
+- **`notifyUrgentIncident`** (nuevo)
+  - Lambda para incidentes **EMERGENCIA / ALTA**.
+  - Se invoca desde `student/createIncident` cuando el tipo/urgencia lo requiere.
+  - Publica en SNS una alerta prioritaria, reutilizando la misma infraestructura de notificaciones.
+
+### 3.4. 🔌 WebSocket backend – `backend/websocket-backend/*`
 
 - **Conexiones (`handlers/connect.py`, `disconnect.py`)**
   - Guarda y elimina `connectionId` en la tabla `WebSocketConnections`.
@@ -159,29 +168,25 @@ La solución está dividida en varios componentes:
 
 ---
 
-## 4. Orquestación con Airflow en ECS Fargate
+## 4. 🌀 Orquestación con Airflow (EC2 Docker Compose / ECS)
 
-Para la capa de orquestación batch se despliega un **Apache Airflow 2.9.0** en **ECS Fargate**:
+Para la capa de orquestación batch se usa **Apache Airflow 2.10.x**:
 
-- Imagen Docker (`airflow-alertautec/Dockerfile`):
-  - Base: `apache/airflow:2.9.0-python3.10`.
-  - Instala `boto3`.
-  - Copia el DAG al contenedor: `COPY dags/ /opt/airflow/dags/`.
+- **Desarrollo / demo:**
+  - Airflow corre en una instancia **EC2** usando `docker-compose` (ver carpeta `airflow-alertautec/airflow`).
+  - Servicios: `airflow-webserver`, `airflow-scheduler`, `airflow-worker`, `redis`, `postgres`.
+  - Se monta `~/.aws` dentro de los contenedores para que `boto3` pueda usar las credenciales de AWS y hablar con DynamoDB, S3 y Lambda.
 
-- Despliegue en ECS Fargate:
-  - Task Definition con contenedor `airflow`.
+- **Producción (conceptual):**
+  - La misma imagen Docker puede desplegarse en **ECS Fargate**, con una Task Definition y Services separados para webserver/scheduler.
   - `Task role` = `LabRole` (permite acceso a DynamoDB, S3 y Lambda).
-  - Comando de inicio: `airflow standalone` (inicializa DB local SQLite, webserver y scheduler en un solo contenedor).
-  - Exposición de puerto `8080` para la UI de Airflow.
 
-- Configuración principal (variables de entorno de la Task):
-  - `AIRFLOW__CORE__EXECUTOR=SequentialExecutor` (sin RDS, usando SQLite local).
+- Configuración principal (env vars):
   - `AWS_REGION=us-east-1`.
   - `REPORTS_BUCKET=alertautec-backend-reportes-dev`.
   - `NOTIFY_DEPT_LAMBDA=alertautec-backend-dev-notifyDepartmentIncident`.
 
 ### 4.1. DAG `alertautec_orchestracion`
-
 El DAG principal hace dos cosas:
 
 1. **`generar_reporte_global`**
@@ -215,18 +220,19 @@ De esta forma, Airflow se convierte en el **cerebro batch** que analiza los inci
    - Frontend → `assignDepartment`.
    - Se actualiza `Incidentes.departamento` y se inserta evento `asignacion` en `IncidenteEventos`.
    - Se notifica al WebSocket (`notify_department_assigned`).
+   - Se genera un reporte individual en S3 y se invoca `notifyDepartmentIncident` para notificar por correo al departamento.
 
 3. **Airflow detecta asignaciones y genera reportes**
    - El DAG `alertautec_orchestracion` escanea `IncidenteEventos`.
    - Genera reportes globales e individuales en S3 (`alertautec-backend-reportes-dev`).
-   - Invoca `notifyDepartmentIncident` para cada nuevo incidente asignado.
+   - Invoca `notifyDepartmentIncident` para cada nuevo incidente asignado (modo batch).
 
-4. **(Futuro) Notificación por correo**
-   - La Lambda `notifyDepartmentIncident` está preparada para que, en una etapa siguiente, se integre con **SES/SNS** para enviar emails o mensajes directos a los departamentos.
+4. **Notificación por correo**
+   - La Lambda `notifyDepartmentIncident` ya está integrada con **SNS** y envía emails a los responsables de cada departamento, incluyendo link al reporte en S3.
 
 ---
 
-## 6. Cómo correr el backend (resumen)
+## 6. 🏃‍♀️ Cómo correr el backend (resumen)
 
 > Nota: este repo asume que ya tienes **Serverless Framework** configurado y credenciales de AWS válidas.
 
@@ -260,18 +266,32 @@ De esta forma, Airflow se convierte en el **cerebro batch** que analiza los inci
 
 ---
 
-## 7. Puntos importantes
+## 7. ✨ Puntos importantes
 
 - **Arquitectura serverless completa**:
   - Backend en Lambdas + DynamoDB + S3.
   - WebSockets para notificaciones en tiempo real de cambios de estado y asignaciones.
 
-- **Orquestación inteligente con Airflow en ECS Fargate**:
+- **Orquestación inteligente con Airflow**:
   - DAG que analiza incidentes, genera reportes y dispara notificaciones a departamentos.
-  - Integrado con DynamoDB, S3 y Lambda.
+  - Integrado con DynamoDB, S3 y Lambda, corriendo en EC2 con Docker Compose (y listo para ECS).
 
 - **Escalabilidad y mantenibilidad**:
   - Microservicios claros (`auth`, `student`, `staff`, `websocket-backend`).
   - Orquestación desacoplada en Airflow, que se puede extender con nuevas tareas (correos, ML, etc.).
 
-AlertaUTEC no solo resuelve el problema de reportar incidentes, sino que también **estructura el flujo de comunicación y análisis**, dejando lista una base sólida para seguir creciendo en producción.
+- **Análisis predictivo y ML con SageMaker**:
+  - Notebook en SageMaker AI que consume los incidentes desde DynamoDB.
+  - Análisis de patrones (zonas de riesgo, horas pico, tipos frecuentes).
+  - Modelo de clasificación (RandomForest / XGBoost) para predecir el tipo de incidente más probable según zona, hora y urgencia.
+  - Integración con un endpoint de SageMaker a través de la Lambda `staff/predictRisk`, accesible solo para `staff` y `admin`.
+
+- **Notificaciones avanzadas**:
+  - WebSocket para tiempo real (creación, cambios de estado, comentarios, asignaciones).
+  - SNS + email para notificar a departamentos sobre nuevos incidentes asignados y emergencias.
+
+- **Experiencia de pruebas amigable**:
+  - Colección Postman en `backend/Postman_Collection.json` con variables (`baseUrl`, `token_student`, `token_staff`, `token_admin`, `incident_id`).
+  - Carpetas organizadas por rol (Auth, Student, Staff/Admin, ML & Notificaciones) para probar todos los flujos end-to-end.
+
+AlertaUTEC no solo resuelve el problema de reportar incidentes, sino que también **estructura el flujo de comunicación, análisis y predicción**, dejando lista una base sólida para seguir creciendo en producción 🚀.
