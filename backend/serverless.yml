@@ -68,7 +68,7 @@ functions:
           cors: true
           integration: lambda
 
-getIncident:
+  getIncident:
     handler: student/getIncident.handler
     events:
       - http:
@@ -85,7 +85,6 @@ getIncident:
           method: post
           cors: true
           integration: lambda-proxy
-
 
   validateLocation:
     handler: student/validateLocation.handler
@@ -116,6 +115,7 @@ getIncident:
 
 
   # --- STAFF / ADMIN ---
+
   updateStatus:
     handler: staff/updateStatus.handler
     events:
