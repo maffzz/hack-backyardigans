@@ -68,14 +68,14 @@ functions:
           cors: true
           integration: lambda
 
-  getIncident:
+getIncident:
     handler: student/getIncident.handler
     events:
       - http:
           path: student/incidents/{id}
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   uploadAttachment:
     handler: student/uploadAttachment.handler
@@ -84,7 +84,8 @@ functions:
           path: student/incidents/{id}/attachments
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
+
 
   validateLocation:
     handler: student/validateLocation.handler
@@ -115,7 +116,6 @@ functions:
 
 
   # --- STAFF / ADMIN ---
-
   updateStatus:
     handler: staff/updateStatus.handler
     events:
@@ -123,7 +123,7 @@ functions:
           path: staff/incidents/{id}/status
           method: put
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   addComment:
     handler: staff/addComment.handler
@@ -132,7 +132,7 @@ functions:
           path: staff/incidents/{id}/comment
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   assignDepartment:
     handler: staff/assignDepartment.handler
@@ -141,7 +141,7 @@ functions:
           path: staff/incidents/{id}/assign
           method: post
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   listForDepartment:
     handler: staff/listForDepartment.handler
@@ -159,7 +159,7 @@ functions:
           path: staff/incidents/{id}/events
           method: get
           cors: true
-          integration: lambda
+          integration: lambda-proxy
 
   staffStats:
     handler: staff/staffStats.handler

@@ -14,6 +14,7 @@ def handler(event, context):
 
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
+        
         if not incident_id:
             return response(400, {"error": "ID de incidente requerido"})
 
