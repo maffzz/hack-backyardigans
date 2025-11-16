@@ -6,20 +6,12 @@ import boto3
 
 # Configuración básica
 REGION = os.environ.get("AWS_REGION", "us-east-1")
-SERVICE_NAME = os.environ.get("SERVICE_NAME", "alertautec-backend")
-STAGE = os.environ.get("STAGE", "dev")
 
 # Deben coincidir con los nombres definidos en serverless.yml
 #   AttachmentsBucket: ${self:service}-attachments-${self:provider.stage}
 #   ReportsBucket:     ${self:service}-reportes-${self:provider.stage}
-ATTACHMENTS_BUCKET = os.environ.get(
-    "ATTACHMENTS_BUCKET",
-    f"{SERVICE_NAME}-attachments-{STAGE}"
-)
-REPORTS_BUCKET = os.environ.get(
-    "REPORTS_BUCKET",
-    f"{SERVICE_NAME}-reportes-{STAGE}"
-)
+ATTACHMENTS_BUCKET = os.environ.get("ATTACHMENTS_BUCKET", "alertautec-backend-attachments-dev")
+REPORTS_BUCKET = os.environ.get("REPORTS_BUCKET", "alertautec-backend-reportes-dev")
 
 s3 = boto3.client("s3", region_name=REGION)
 

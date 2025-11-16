@@ -5,7 +5,7 @@ provider:
   name: aws
   runtime: python3.13
   region: us-east-1
-  stage: ${sls:stage, 'dev'}  # Stage dinámico, por defecto 'dev'
+  stage: dev
   iam:
     role: arn:aws:iam::096410127560:role/LabRole
   environment:
