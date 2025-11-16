@@ -301,7 +301,6 @@ resources:
           BlockPublicPolicy: false
           IgnorePublicAcls: false
           RestrictPublicBuckets: false
-        AccessControl: PublicRead
         WebsiteConfiguration:
           IndexDocument: index.html
 
@@ -318,7 +317,7 @@ resources:
               Action:
                 - s3:GetObject
               Resource: !Sub "${ReportsBucket.Arn}/*"
-              
+
     IncidentNotificationsTopic:
       Type: AWS::SNS::Topic
       Properties:
