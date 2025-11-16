@@ -9,7 +9,7 @@ provider:
   stage: dev
   region: us-east-1
   iam:
-    role: arn:aws:iam::486926857723:role/LabRole
+    role: arn:aws:iam::492147277453:role/LabRole
 
 resources:
   Resources:
@@ -65,3 +65,66 @@ resources:
           - AttributeName: department_id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: AlertaUTECUserPool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        MfaConfiguration: "OFF"
+        Schema:
+          - Name: email
+            Required: true
+            Mutable: false
+          - Name: department
+            AttributeDataType: "String"
+            Mutable: true
+            Required: false
+          - Name: role
+            AttributeDataType: "String"
+            Mutable: true
+            Required: false
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireUppercase: false
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireSymbols: false
+
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: alertaUTEC-app-client
+        GenerateSecret: false
+        UserPoolId:
+          Ref: CognitoUserPool
+        ExplicitAuthFlows:
+          - ALLOW_REFRESH_TOKEN_AUTH
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_USER_SRP_AUTH
+        PreventUserExistenceErrors: ENABLED
+
+    StudentGroup:
+      Type: AWS::Cognito::UserPoolGroup
+      Properties:
+        GroupName: STUDENT
+        UserPoolId:
+          Ref: CognitoUserPool
+
+    StaffGroup:
+      Type: AWS::Cognito::UserPoolGroup
+      Properties:
+        GroupName: STAFF
+        UserPoolId:
+          Ref: CognitoUserPool
+
+    AdminGroup:
+      Type: AWS::Cognito::UserPoolGroup
+      Properties:
+        GroupName: ADMIN
+        UserPoolId:
+          Ref: CognitoUserPool
