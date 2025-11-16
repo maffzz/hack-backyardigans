@@ -1,5 +1,6 @@
 import json
 from common.locations import get_valid_locations
+from common.authorize import authorize
 
 def response(code, body):
     if isinstance(body, dict):
@@ -20,6 +21,10 @@ def response(code, body):
 
 def handler(event, context):
     try:
+        user = authorize(event)
+        if not user:
+            return response(403, {"error": "Token inválido"})
+        
         locations = get_valid_locations()
         
         # Formatear para el frontend
