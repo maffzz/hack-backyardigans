@@ -11,6 +11,126 @@ provider:
   iam:
     role: arn:aws:iam::492147277453:role/LabRole
 
+
+    
+functions:
+
+  createIncident:
+    handler: student/createIncident.handler
+    events:
+      - http:
+          path: student/incidents
+          method: post
+          cors: true
+
+  listIncidents:
+    handler: student/listIncidents.handler
+    events:
+      - http:
+          path: student/incidents
+          method: get
+          cors: true
+
+  listMine:
+    handler: student/listMine.handler
+    events:
+      - http:
+          path: student/incidents/mine
+          method: get
+          cors: true
+
+  getIncident:
+    handler: student/getIncident.handler
+    events:
+      - http:
+          path: student/incidents/{id}
+          method: get
+          cors: true
+
+  uploadAttachment:
+    handler: student/uploadAttachment.handler
+    events:
+      - http:
+          path: student/incidents/{id}/attachments
+          method: post
+          cors: true
+
+  validateLocation:
+    handler: student/validateLocation.handler
+    events:
+      - http:
+          path: student/incidents/validate-location
+          method: post
+          cors: true
+
+  previewIncident:
+    handler: student/previewIncident.handler
+    events:
+      - http:
+          path: student/incidents/preview
+          method: post
+          cors: true
+
+  statsBasic:
+    handler: student/statsBasic.handler
+    events:
+      - http:
+          path: student/incidents/stats/basic
+          method: get
+          cors: true
+
+
+
+  updateStatus:
+    handler: staff/updateStatus.handler
+    events:
+      - http:
+          path: staff/incidents/{id}/status
+          method: put
+          cors: true
+
+  addComment:
+    handler: staff/addComment.handler
+    events:
+      - http:
+          path: staff/incidents/{id}/comment
+          method: post
+          cors: true
+
+  assignDepartment:
+    handler: staff/assignDepartment.handler
+    events:
+      - http:
+          path: staff/incidents/{id}/assign
+          method: post
+          cors: true
+
+  listForDepartment:
+    handler: staff/listForDepartment.handler
+    events:
+      - http:
+          path: staff/incidents/by-department
+          method: get
+          cors: true
+
+  getIncidentEvents:
+    handler: staff/getIncidentEvents.handler
+    events:
+      - http:
+          path: staff/incidents/{id}/events
+          method: get
+          cors: true
+
+  staffStats:
+    handler: staff/staffStats.handler
+    events:
+      - http:
+          path: staff/incidents/stats
+          method: get
+          cors: true
+
+
+
 resources:
   Resources:
 
@@ -128,3 +248,4 @@ resources:
         GroupName: ADMIN
         UserPoolId:
           Ref: CognitoUserPool
+
