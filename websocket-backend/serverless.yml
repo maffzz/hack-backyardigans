@@ -6,6 +6,8 @@ provider:
   runtime: python3.13
   region: us-east-1
   stage: dev
+  iam:
+    role: arn:aws:iam::258454103606:role/LabRole
   environment:
     CONNECTIONS_TABLE: ${self:service}-${self:provider.stage}-connections
     WS_ENDPOINT: https://j7aujre4ia.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}
