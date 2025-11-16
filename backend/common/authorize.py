@@ -2,7 +2,8 @@ import json
 import boto3
 
 def authorize(event):
-    token = event["headers"].get("Authorization")
+    headers = event.get("headers", {})
+    token = headers.get("Authorization") or headers.get("authorization")
 
     if not token:
         return None
@@ -11,7 +12,7 @@ def authorize(event):
     response = lambda_client.invoke(
         FunctionName="alertautec-backend-dev-ValidarTokenAcceso",
         InvocationType="RequestResponse",
-        Payload={"token": token}
+        Payload=json.dumps({"token": token})
     )
 
     payload = json.loads(response["Payload"].read())
@@ -19,4 +20,7 @@ def authorize(event):
     if payload["statusCode"] == 403:
         return None
 
-    return json.loads(payload["body"])
+    body = payload.get("body")
+    if isinstance(body, str):
+        return json.loads(body)
+    return body

@@ -10,23 +10,38 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")   # TABLA REAL
 
 def response(code, body):
+    if isinstance(body, dict):
+        body_str = json.dumps(body)
+    elif isinstance(body, str):
+        body_str = body
+    else:
+        body_str = json.dumps({"error": str(body)})
+    
     return {
         "statusCode": code,
         "headers": {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
         },
-        "body": body
+        "body": body_str
     }
 
 def handler(event, context):
     try:
         print("EVENT:", event)
 
-        try:
-            body = event.get("body")
-        except:
-            return response(400, {"error": "Body JSON inválido"})
+        body = event.get("body")
+        if body is None:
+            return response(400, {"error": "Body requerido"})
+        
+        if isinstance(body, str):
+            try:
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                return response(400, {"error": "Body JSON inválido"})
+        
+        if not isinstance(body, dict):
+            return response(400, {"error": "Body debe ser un objeto JSON"})
 
         required = ["tipo", "descripcion", "ubicacion", "urgencia"]
         missing = [r for r in required if r not in body]
