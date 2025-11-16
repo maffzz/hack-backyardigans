@@ -15,17 +15,17 @@ def handler(event, context):
         if not user:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'Token inválido'
-                }
+                })
             }
 
         if user["role"] not in ["staff", "admin"]:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'Permiso denegado'
-                }
+                })
             }
         
         path_params = event.get("pathParameters") or {}
@@ -33,9 +33,9 @@ def handler(event, context):
         if not incident_id:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'ID de incidente requerido'
-                }
+                })
             }
         
         body = event.get("body")
@@ -46,9 +46,9 @@ def handler(event, context):
         if not comentario:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'Falta comentario'
-                }
+                })
             }
         
         event_data = {
@@ -69,15 +69,15 @@ def handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': {
+            'body': json.dumps({
                 'mensaje': 'Comentario agregado'
-            }
+            })
         }
     except Exception as e:
         traceback.print_exc()
         return {
             'statusCode': 500,
-            'body': {
+            'body': json.dumps({
                 'error': 'Error interno'
-            }
+            })
         }

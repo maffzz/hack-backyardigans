@@ -18,9 +18,9 @@ def handler(event, context):
         if not incident_id:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'ID de incidente requerido'
-                }
+                })
             }
 
         body = event.get("body")
@@ -30,9 +30,9 @@ def handler(event, context):
         if "file" not in body or "filename" not in body:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'Falta file o filename'
-                }
+                })
             }
 
         file_data = base64.b64decode(body["file"])
@@ -62,17 +62,17 @@ def handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': {
+            'body': json.dumps({
                 'message': 'Archivo subido',
                 'url': file_url
-            }
+            })
         }
 
     except Exception as e:
         traceback.print_exc()
         return {
             'statusCode': 500,
-            'body': {
+            'body': json.dumps({
                 'error': str(e)
-            }
+            })
         }

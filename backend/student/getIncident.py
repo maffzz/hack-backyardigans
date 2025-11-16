@@ -1,4 +1,5 @@
 import boto3
+import json
 import traceback
 from common.authorize import authorize
 from common.helpers import convert_decimals
@@ -12,9 +13,9 @@ def handler(event, context):
         if not user:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'Token inválido'
-                }
+                })
             }
 
         path_params = event.get("pathParameters") or {}
@@ -23,9 +24,9 @@ def handler(event, context):
         if not incident_id:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'ID de incidente requerido'
-                }
+                })
             }
 
         result = table.get_item(Key={"incident_id": incident_id})
@@ -33,25 +34,25 @@ def handler(event, context):
         if "Item" not in result:
             return {
                 'statusCode': 404,
-                'body': {
+                'body': json.dumps({
                     'error': 'Incidente no encontrado'
-                }
+                })
             }
 
         item = convert_decimals(result["Item"])
 
         return {
             'statusCode': 200,
-            'body': {
+            'body': json.dumps({
                 'data': item
-            }
+            })
         }
 
     except Exception as e:
         traceback.print_exc()
         return {
             'statusCode': 500,
-            'body': {
+            'body': json.dumps({
                 'error': str(e)
-            }
+            })
         }

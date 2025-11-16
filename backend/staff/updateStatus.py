@@ -18,9 +18,9 @@ def handler(event, context):
         if not incident_id:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'ID de incidente requerido'
-                }
+                })
             }
         
         body = event.get("body")
@@ -30,44 +30,44 @@ def handler(event, context):
             except:
                 return {
                     'statusCode': 400,
-                    'body': {
+                    'body': json.dumps({
                         'error': 'Body JSON inválido'
-                    }
+                    })
                 }
         
         new_status = body.get("estado")
         if not new_status:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': "El campo 'estado' es requerido"
-                }
+                })
             }
         
         valid_statuses = ["pendiente", "en_proceso", "resuelto", "cerrado"]
         if new_status not in valid_statuses:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': f"Estado inválido. Valores válidos: {', '.join(valid_statuses)}"
-                }
+                })
             }
         
         user = authorize(event)
         if not user:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'Token inválido'
-                }
+                })
             }
         
         if user["role"] not in ["staff", "admin"]:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'Solo staff o admin pueden actualizar estados'
-                }
+                })
             }
         
         # Obtener incidente actual
@@ -77,9 +77,9 @@ def handler(event, context):
         if not incident:
             return {
                 'statusCode': 404,
-                'body': {
+                'body': json.dumps({
                     'error': 'Incidente no encontrado'
-                }
+                })
             }
         
         # Validar transición de estado
@@ -89,9 +89,9 @@ def handler(event, context):
         except Exception as e:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': str(e)
-                }
+                })
             }
         
         # Actualizar estado
@@ -125,7 +125,7 @@ def handler(event, context):
         
         return {
             'statusCode': 200,
-            'body': {
+            'body': json.dumps({
                 'message': 'Estado actualizado',
                 'data': {
                     'incident_id': incident_id,
@@ -133,13 +133,13 @@ def handler(event, context):
                     'estado_nuevo': new_status,
                     'actualizado_por': user.get("user_id", "Usuario")
                 }
-            }
+            })
         }
     except Exception as e:
         traceback.print_exc()
         return {
             'statusCode': 500,
-            'body': {
+            'body': json.dumps({
                 'error': str(e)
-            }
+            })
         }

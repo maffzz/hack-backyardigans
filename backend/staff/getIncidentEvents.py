@@ -11,17 +11,17 @@ def handler(event, context):
         if not user:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'Token inválido'
-                }
+                })
             }
 
         if user["role"] not in ["staff", "admin"]:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'Permiso denegado'
-                }
+                })
             }
 
         path_params = event.get("pathParameters") or {}
@@ -29,9 +29,9 @@ def handler(event, context):
         if not incident_id:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'ID de incidente requerido'
-                }
+                })
             }
         
         # Parámetros de paginación
@@ -60,13 +60,13 @@ def handler(event, context):
         
         return {
             'statusCode': 200,
-            'body': response_data
+            'body': json.dumps(response_data)
         }
     except Exception as e:
         traceback.print_exc()
         return {
             'statusCode': 500,
-            'body': {
+            'body': json.dumps({
                 'error': 'Error interno'
-            }
+            })
         }

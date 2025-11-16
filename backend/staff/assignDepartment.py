@@ -17,9 +17,9 @@ def handler(event, context):
         if not incident_id:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'ID de incidente requerido'
-                }
+                })
             }
         
         body = event.get("body")
@@ -30,26 +30,26 @@ def handler(event, context):
         if not user:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'Token inválido'
-                }
+                })
             }
 
         if user["role"] not in ["staff", "admin"]:
             return {
                 'statusCode': 403,
-                'body': {
+                'body': json.dumps({
                     'error': 'No autorizado'
-                }
+                })
             }
 
         dep = user.get("department")
         if not dep:
             return {
                 'statusCode': 400,
-                'body': {
+                'body': json.dumps({
                     'error': 'Tu usuario no tiene departamento'
-                }
+                })
             }
 
         # update Incidente
@@ -77,16 +77,16 @@ def handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': {
+            'body': json.dumps({
                 'mensaje': 'Asignado correctamente'
-            }
+            })
         }
 
     except Exception as e:
         traceback.print_exc()
         return {
             'statusCode': 500,
-            'body': {
+            'body': json.dumps({
                 'error': 'Error interno'
-            }
+            })
         }
