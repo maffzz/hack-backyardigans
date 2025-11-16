@@ -1,20 +1,10 @@
-import json
 import boto3
 import traceback
 from collections import Counter
+from common.response import response
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")
-
-def response(code, body):
-    return {
-        "statusCode": code,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": body
-    }
 
 def handler(event, context):
     try:

@@ -1,23 +1,6 @@
-import json
+from common.response import response
 from common.locations import get_valid_locations
 from common.authorize import authorize
-
-def response(code, body):
-    if isinstance(body, dict):
-        body_str = json.dumps(body)
-    elif isinstance(body, str):
-        body_str = body
-    else:
-        body_str = json.dumps({"error": str(body)})
-    
-    return {
-        "statusCode": code,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": body_str
-    }
 
 def handler(event, context):
     try:

@@ -57,6 +57,7 @@ functions:
           path: student/incidents
           method: get
           cors: true
+          integration: lambda
 
   listMine:
     handler: student/listMine.handler
@@ -65,6 +66,7 @@ functions:
           path: student/incidents/mine
           method: get
           cors: true
+          integration: lambda
 
   getIncident:
     handler: student/getIncident.handler
@@ -73,6 +75,7 @@ functions:
           path: student/incidents/{id}
           method: get
           cors: true
+          integration: lambda
 
   uploadAttachment:
     handler: student/uploadAttachment.handler
@@ -81,6 +84,7 @@ functions:
           path: student/incidents/{id}/attachments
           method: post
           cors: true
+          integration: lambda
 
   validateLocation:
     handler: student/validateLocation.handler
@@ -89,6 +93,7 @@ functions:
           path: student/incidents/validate-location
           method: post
           cors: true
+          integration: lambda
 
   previewIncident:
     handler: student/previewIncident.handler
@@ -97,6 +102,7 @@ functions:
           path: student/incidents/preview
           method: post
           cors: true
+          integration: lambda
 
   statsBasic:
     handler: student/statsBasic.handler
@@ -105,6 +111,7 @@ functions:
           path: student/incidents/stats/basic
           method: get
           cors: true
+          integration: lambda
 
 
   # --- STAFF / ADMIN ---
@@ -116,6 +123,7 @@ functions:
           path: staff/incidents/{id}/status
           method: put
           cors: true
+          integration: lambda
 
   addComment:
     handler: staff/addComment.handler
@@ -124,6 +132,7 @@ functions:
           path: staff/incidents/{id}/comment
           method: post
           cors: true
+          integration: lambda
 
   assignDepartment:
     handler: staff/assignDepartment.handler
@@ -132,6 +141,7 @@ functions:
           path: staff/incidents/{id}/assign
           method: post
           cors: true
+          integration: lambda
 
   listForDepartment:
     handler: staff/listForDepartment.handler
@@ -140,6 +150,7 @@ functions:
           path: staff/incidents/by-department
           method: get
           cors: true
+          integration: lambda
 
   getIncidentEvents:
     handler: staff/getIncidentEvents.handler
@@ -148,6 +159,7 @@ functions:
           path: staff/incidents/{id}/events
           method: get
           cors: true
+          integration: lambda
 
   staffStats:
     handler: staff/staffStats.handler
@@ -156,6 +168,7 @@ functions:
           path: staff/incidents/stats
           method: get
           cors: true
+          integration: lambda
 
 
 resources:

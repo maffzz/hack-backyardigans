@@ -1,15 +1,9 @@
 import json
 import boto3
 import traceback
+from common.response import response
 from common.authorize import authorize
 from common.database import DatabaseHelper
-
-def response(code, body):
-    return {
-        "statusCode": code,
-        "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(body) if isinstance(body, dict) else body
-    }
 
 def handler(event, context):
     try:

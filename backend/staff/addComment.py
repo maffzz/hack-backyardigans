@@ -3,18 +3,12 @@ import boto3
 from datetime import datetime 
 import uuid
 import traceback
+from common.response import response
 from common.authorize import authorize
 from common.websocket import notify_comment_added
 
 dynamodb = boto3.resource("dynamodb")
 table_evt = dynamodb.Table("IncidenteEventos")
-
-def response(code, body):
-    return {
-        "statusCode": code,
-        "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(body) if isinstance(body, dict) else body
-    }
 
 def handler(event, context):
     try:

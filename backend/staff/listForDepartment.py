@@ -1,17 +1,11 @@
 import json
+from common.response import response
 from common.authorize import authorize
 import boto3
 import traceback
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")
-
-def response(code, body):
-    return {
-        "statusCode": code,
-        "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(body) if isinstance(body, dict) else body
-    }
 
 def handler(event, context):
     try:
