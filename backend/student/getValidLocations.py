@@ -1,13 +1,8 @@
 from common.response import response
 from common.locations import get_valid_locations
-from common.authorize import authorize
 
 def handler(event, context):
     try:
-        user = authorize(event)
-        if not user:
-            return response(403, {"error": "Token inválido"})
-        
         locations = get_valid_locations()
         
         # Formatear para el frontend

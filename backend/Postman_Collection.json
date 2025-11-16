@@ -1,0 +1,421 @@
+{
+	"info": {
+		"name": "AlertaUTEC Backend API",
+		"description": "Colección completa de endpoints para el backend de AlertaUTEC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "incident_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Register User (Student)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"estudiante001\",\n    \"password\": \"password123\",\n    \"role\": \"student\",\n    \"department\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Register User (Staff)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"staff001\",\n    \"password\": \"password123\",\n    \"role\": \"staff\",\n    \"department\": \"Mantenimiento\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login (Generate Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.body) {",
+									"        var body = typeof jsonData.body === 'string' ? JSON.parse(jsonData.body) : jsonData.body;",
+									"        if (body.token) {",
+									"            pm.collectionVariables.set('token', body.token);",
+									"        }",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"estudiante001\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👨‍🎓 Student Endpoints",
+			"item": [
+				{
+					"name": "Create Incident",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tipo\": \"Fuga de agua\",\n    \"descripcion\": \"Hay una fuga de agua en el baño del segundo piso\",\n    \"ubicacion\": \"Edificio 1, Piso 2, Baño\",\n    \"urgencia\": \"alta\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/student/incidents",
+							"host": ["{{base_url}}"],
+							"path": ["student", "incidents"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.body) {",
+									"        var body = typeof jsonData.body === 'string' ? JSON.parse(jsonData.body) : jsonData.body;",
+									"        if (body.data && body.data.incident_id) {",
+									"            pm.collectionVariables.set('incident_id', body.data.incident_id);",
+									"        }",
+									"    }",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "List All Incidents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/student/incidents",
+							"host": ["{{base_url}}"],
+							"path": ["student", "incidents"]
+						}
+					}
+				},
+				{
+					"name": "List My Incidents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/student/incidents/mine",
+							"host": ["{{base_url}}"],
+							"path": ["student", "incidents", "mine"]
+						}
+					}
+				},
+				{
+					"name": "Get Incident by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/student/incidents/{{incident_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["student", "incidents", "{{incident_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Validate Location",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"edificio\": \"1\",\n    \"piso\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/student/incidents/validate-location",
+							"host": ["{{base_url}}"],
+							"path": ["student", "incidents", "validate-location"]
+						}
+					}
+				},
+				{
+					"name": "Preview Incident",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tipo\": \"Fuga de agua\",\n    \"descripcion\": \"Preview del incidente\",\n    \"ubicacion\": \"Edificio 1, Piso 2\",\n    \"urgencia\": \"alta\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/student/incidents/preview",
+							"host": ["{{base_url}}"],
+							"path": ["student", "incidents", "preview"]
+						}
+					}
+				},
+				{
+					"name": "Upload Attachment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"file\": \"base64EncodedFileContentHere\",\n    \"filename\": \"foto.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/student/incidents/{{incident_id}}/attachments",
+							"host": ["{{base_url}}"],
+							"path": ["student", "incidents", "{{incident_id}}", "attachments"]
+						}
+					}
+				},
+				{
+					"name": "Basic Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/student/incidents/stats/basic",
+							"host": ["{{base_url}}"],
+							"path": ["student", "incidents", "stats", "basic"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👔 Staff Endpoints",
+			"item": [
+				{
+					"name": "Update Incident Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"estado\": \"en_proceso\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/staff/incidents/{{incident_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["staff", "incidents", "{{incident_id}}", "status"]
+						}
+					}
+				},
+				{
+					"name": "Add Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comentario\": \"Se ha revisado el incidente y se está trabajando en la solución\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/staff/incidents/{{incident_id}}/comment",
+							"host": ["{{base_url}}"],
+							"path": ["staff", "incidents", "{{incident_id}}", "comment"]
+						}
+					}
+				},
+				{
+					"name": "Assign Department",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/staff/incidents/{{incident_id}}/assign",
+							"host": ["{{base_url}}"],
+							"path": ["staff", "incidents", "{{incident_id}}", "assign"]
+						}
+					}
+				},
+				{
+					"name": "List Incidents by Department",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/staff/incidents/by-department",
+							"host": ["{{base_url}}"],
+							"path": ["staff", "incidents", "by-department"]
+						}
+					}
+				},
+				{
+					"name": "Get Incident Events",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/staff/incidents/{{incident_id}}/events",
+							"host": ["{{base_url}}"],
+							"path": ["staff", "incidents", "{{incident_id}}", "events"]
+						}
+					}
+				},
+				{
+					"name": "Staff Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/staff/incidents/stats",
+							"host": ["{{base_url}}"],
+							"path": ["staff", "incidents", "stats"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
+
