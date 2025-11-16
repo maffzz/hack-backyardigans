@@ -1,5 +1,12 @@
 import json
+import os
 import boto3
+
+# Obtener nombre de la función Lambda desde variables de entorno
+VALIDATE_TOKEN_LAMBDA = os.environ.get(
+    "VALIDATE_TOKEN_LAMBDA",
+    f"{os.environ.get('SERVICE_NAME', 'alertautec-backend')}-{os.environ.get('STAGE', 'dev')}-ValidarTokenAcceso"
+)
 
 def authorize(event):
     headers = event.get("headers", {})
@@ -10,7 +17,7 @@ def authorize(event):
     
     lambda_client = boto3.client("lambda")
     response = lambda_client.invoke(
-        FunctionName="alertautec-backend-dev-ValidarTokenAcceso",
+        FunctionName=VALIDATE_TOKEN_LAMBDA,
         InvocationType="RequestResponse",
         Payload=json.dumps({"body": {"token": token}})
     )

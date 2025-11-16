@@ -15,10 +15,16 @@ table_evt = dynamodb.Table("IncidenteEventos")
 s3 = boto3.client("s3")
 lambda_client = boto3.client("lambda")
 
-REPORTS_BUCKET = os.environ.get("REPORTS_BUCKET", "alertautec-backend-reportes-dev")
+# Usar variables de entorno dinámicas
+SERVICE_NAME = os.environ.get("SERVICE_NAME", "alertautec-backend")
+STAGE = os.environ.get("STAGE", "dev")
+REPORTS_BUCKET = os.environ.get(
+    "REPORTS_BUCKET",
+    f"{SERVICE_NAME}-reportes-{STAGE}"
+)
 LAMBDA_NOTIFY = os.environ.get(
     "NOTIFY_DEPT_LAMBDA",
-    "alertautec-backend-dev-notifyDepartmentIncident",
+    f"{SERVICE_NAME}-{STAGE}-notifyDepartmentIncident",
 )
 
 def handler(event, context):

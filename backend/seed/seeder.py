@@ -1,7 +1,12 @@
 import json
+import os
 import requests
 
-API = "https://4f7f6il2j5.execute-api.us-east-1.amazonaws.com/dev"
+# Usar variable de entorno o valor por defecto
+API = os.environ.get(
+    "API_ENDPOINT",
+    "https://4f7f6il2j5.execute-api.us-east-1.amazonaws.com/dev"
+)
 
 
 def parse_body(response):

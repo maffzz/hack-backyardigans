@@ -1,19 +1,37 @@
 org: maferlazon
 service: alertautec-backend
 
+# Configuración personalizada (valores por defecto para endpoints)
+custom:
+  # Endpoints - configurar aquí o usar variables de entorno del sistema
+  # Para sobrescribir: export WS_ENDPOINT=... antes de serverless deploy
+  wsEndpoint: ''  # Ejemplo: https://xxxxx.execute-api.us-east-1.amazonaws.com/dev
+  apiEndpoint: ''  # Ejemplo: https://xxxxx.execute-api.us-east-1.amazonaws.com/dev
+
 provider:
   name: aws
   runtime: python3.13
   memorySize: 1024
   timeout: 30
-  stage: dev
+  stage: ${sls:stage, 'dev'}  # Stage dinámico, por defecto 'dev'
   region: us-east-1
   iam:
     role: arn:aws:iam::096410127560:role/LabRole
   environment:
     STAGE: ${self:provider.stage}
+    SERVICE_NAME: ${self:service}
+    AWS_REGION: ${self:provider.region}
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
     REPORTS_BUCKET: ${self:service}-reportes-${self:provider.stage}
+    SNS_TOPIC_ARN:
+      Ref: IncidentNotificationsTopic
+    # Lambdas - nombres dinámicos según stage
+    VALIDATE_TOKEN_LAMBDA: ${self:service}-${self:provider.stage}-ValidarTokenAcceso
+    NOTIFY_DEPT_LAMBDA: ${self:service}-${self:provider.stage}-notifyDepartmentIncident
+    # WebSocket - configurar en custom.wsEndpoint o usar variable de entorno del sistema
+    WS_ENDPOINT: ${env:WS_ENDPOINT, self:custom.wsEndpoint, ''}
+    # API Endpoint - configurar en custom.apiEndpoint o usar variable de entorno del sistema
+    API_ENDPOINT: ${env:API_ENDPOINT, self:custom.apiEndpoint, ''}
 
 functions:
 
@@ -175,6 +193,11 @@ functions:
   notifyDepartmentIncident:
     handler: staff/notifyDepartmentIncident.handler
 
+  # --- NOTIFICATIONS ---
+
+  sendEmailNotification:
+    handler: notifications/sendEmailNotification.handler
+
 
 resources:
   Resources:
@@ -288,3 +311,14 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:service}-reportes-${self:provider.stage}
+
+    # --- SNS FOR EMAIL NOTIFICATIONS ---
+
+    IncidentNotificationsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:service}-incident-notifications-${self:provider.stage}
+        DisplayName: Incident Notifications
+        Subscription:
+          - Protocol: email
+            Endpoint: martin.bonilla@utec.edu.pe
