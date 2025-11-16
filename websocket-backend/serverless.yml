@@ -1,5 +1,5 @@
 org: asaldarriaga
-service: websocket-backend
+service: websocket-backend-new
 
 provider:
   name: aws
