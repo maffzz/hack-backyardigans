@@ -1,4 +1,5 @@
 import json
+from common.auth import get_user_from_request
 import boto3
 from datetime import datetime
 import uuid
@@ -21,7 +22,12 @@ def handler(event, context):
         incident_id = event["pathParameters"]["id"]
         body = json.loads(event["body"])
 
-        dep = body.get("departamento")
+        user = get_user_from_request(event)
+
+        if user["role"] not in ["staff", "admin"]:
+            return response(403, {"error": "Permiso denegado"})
+
+        dep = user["department"]
         if not dep:
             return response(400, {"error": "Falta departamento"})
 

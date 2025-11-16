@@ -1,4 +1,5 @@
 import json
+from common.auth import get_user_from_request
 import boto3
 import traceback
 
@@ -14,8 +15,12 @@ def response(code, body):
 
 def handler(event, context):
     try:
-        dep = event["queryStringParameters"]["departamento"]
+        user = get_user_from_request(event)
 
+        if user["role"] not in ["staff", "admin"]:
+            return response(403, {"error": "No autorizado"})
+
+        dep = user["department"]
         result = table.scan()
         items = result.get("Items", [])
 
