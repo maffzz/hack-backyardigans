@@ -1,0 +1,18 @@
+[
+  {
+    "user_id": "admin@utec.edu.pe",
+    "password": "admin123",
+    "role": "ADMIN"
+  },
+  {
+    "user_id": "juan.staff@utec.edu.pe",
+    "password": "staff123",
+    "role": "STAFF",
+    "department": "MANTENIMIENTO"
+  },
+  {
+    "user_id": "maria.student@utec.edu.pe",
+    "password": "student123",
+    "role": "STUDENT"
+  }
+]

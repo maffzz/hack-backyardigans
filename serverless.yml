@@ -8,27 +8,38 @@ provider:
   timeout: 30
   stage: dev
   region: us-east-1
-  environment:
-    WEBSOCKET_SERVICE_NAME: websocket-backend
-    STAGE: ${self:provider.stage}
   iam:
     role: arn:aws:iam::258454103606:role/LabRole
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - lambda:InvokeFunction
-      Resource:
-        - arn:aws:lambda:${self:provider.region}:*:function:websocket-backend-${self:provider.stage}-*
-    - Effect: Allow
-      Action:
-        - dynamodb:PutItem
-        - dynamodb:DeleteItem
-        - dynamodb:Scan
-        - dynamodb:GetItem
-      Resource:
-        - arn:aws:dynamodb:${self:provider.region}:*:table/websocket-backend-${self:provider.stage}-connections
+  environment:
+    STAGE: ${self:provider.stage}
 
 functions:
+
+  # --- AUTHENTICATION SYSTEM ---
+
+  RegisterUser:
+    handler: auth/RegisterUser.lambda_handler
+    events:
+      - http:
+          path: auth/register
+          method: post
+          cors: true
+          integration: lambda
+
+  GenerateToken:
+    handler: auth/GenerateTokenAcceso.lambda_handler
+    events:
+      - http:
+          path: auth/login
+          method: post
+          cors: true
+          integration: lambda
+
+  ValidarTokenAcceso:
+    handler: auth/ValidarTokenAcceso.lambda_handler
+
+
+  # --- STUDENT ---
 
   createIncident:
     handler: student/createIncident.handler
@@ -38,10 +49,6 @@ functions:
           method: post
           cors: true
           integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   listIncidents:
     handler: student/listIncidents.handler
@@ -50,11 +57,6 @@ functions:
           path: student/incidents
           method: get
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   listMine:
     handler: student/listMine.handler
@@ -63,11 +65,6 @@ functions:
           path: student/incidents/mine
           method: get
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   getIncident:
     handler: student/getIncident.handler
@@ -76,11 +73,6 @@ functions:
           path: student/incidents/{id}
           method: get
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   uploadAttachment:
     handler: student/uploadAttachment.handler
@@ -89,11 +81,6 @@ functions:
           path: student/incidents/{id}/attachments
           method: post
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   validateLocation:
     handler: student/validateLocation.handler
@@ -102,11 +89,6 @@ functions:
           path: student/incidents/validate-location
           method: post
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   previewIncident:
     handler: student/previewIncident.handler
@@ -115,11 +97,6 @@ functions:
           path: student/incidents/preview
           method: post
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   statsBasic:
     handler: student/statsBasic.handler
@@ -128,11 +105,9 @@ functions:
           path: student/incidents/stats/basic
           method: get
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
+
+
+  # --- STAFF / ADMIN ---
 
   updateStatus:
     handler: staff/updateStatus.handler
@@ -141,11 +116,6 @@ functions:
           path: staff/incidents/{id}/status
           method: put
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   addComment:
     handler: staff/addComment.handler
@@ -154,11 +124,6 @@ functions:
           path: staff/incidents/{id}/comment
           method: post
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   assignDepartment:
     handler: staff/assignDepartment.handler
@@ -167,11 +132,6 @@ functions:
           path: staff/incidents/{id}/assign
           method: post
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   listForDepartment:
     handler: staff/listForDepartment.handler
@@ -180,11 +140,6 @@ functions:
           path: staff/incidents/by-department
           method: get
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   getIncidentEvents:
     handler: staff/getIncidentEvents.handler
@@ -193,11 +148,6 @@ functions:
           path: staff/incidents/{id}/events
           method: get
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
 
   staffStats:
     handler: staff/staffStats.handler
@@ -206,27 +156,39 @@ functions:
           path: staff/incidents/stats
           method: get
           cors: true
-          integration: lambda
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
+
 
 resources:
   Resources:
 
-    ApiGatewayAuthorizer:
-      Type: AWS::ApiGateway::Authorizer
+    # --- AUTH TABLES ---
+
+    Users:
+      Type: AWS::DynamoDB::Table
       Properties:
-        Name: CognitoAuthorizer
-        Type: COGNITO_USER_POOLS
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        ProviderARNs:
-          - Fn::GetAtt:
-              - CognitoUserPool
-              - Arn
-        IdentitySource: method.request.header.Authorization
+        TableName: Users
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    Tokens:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Tokens
+        AttributeDefinitions:
+          - AttributeName: token
+            AttributeType: S
+        KeySchema:
+          - AttributeName: token
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+
+    # --- INCIDENTES ---
 
     Incidentes:
       Type: AWS::DynamoDB::Table
@@ -279,66 +241,3 @@ resources:
           - AttributeName: connectionId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-
-    CognitoUserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UserPoolName: AlertaUTECUserPool
-        UsernameAttributes:
-          - email
-        AutoVerifiedAttributes:
-          - email
-        MfaConfiguration: "OFF"
-        Schema:
-          - Name: email
-            Required: true
-            Mutable: false
-          - Name: department
-            AttributeDataType: String
-            Mutable: true
-            Required: false
-          - Name: role
-            AttributeDataType: String
-            Mutable: true
-            Required: false
-        Policies:
-          PasswordPolicy:
-            MinimumLength: 8
-            RequireUppercase: false
-            RequireLowercase: true
-            RequireNumbers: true
-            RequireSymbols: false
-
-    CognitoUserPoolClient:
-      Type: AWS::Cognito::UserPoolClient
-      Properties:
-        ClientName: alertaUTEC-app-client
-        GenerateSecret: false
-        UserPoolId:
-          Ref: CognitoUserPool
-        ExplicitAuthFlows:
-          - ALLOW_REFRESH_TOKEN_AUTH
-          - ALLOW_USER_PASSWORD_AUTH
-          - ALLOW_USER_SRP_AUTH
-        PreventUserExistenceErrors: ENABLED
-
-    StudentGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: STUDENT
-        UserPoolId:
-          Ref: CognitoUserPool
-
-    StaffGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: STAFF
-        UserPoolId:
-          Ref: CognitoUserPool
-
-    AdminGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: ADMIN
-        UserPoolId:
-          Ref: CognitoUserPool
