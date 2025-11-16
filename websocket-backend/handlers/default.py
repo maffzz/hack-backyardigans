@@ -3,11 +3,21 @@ import json
 import boto3
 from common.db import list_connections, delete_connection
 
-WS_ENDPOINT = os.environ.get("WS_ENDPOINT")  # ej: https://abc123.execute-api.us-east-1.amazonaws.com/dev
+WS_ENDPOINT = os.environ.get("WS_ENDPOINT")  
 
-apigw = boto3.client("apigatewaymanagementapi", endpoint_url=WS_ENDPOINT)
+# Inicializar cliente solo si WS_ENDPOINT está configurado
+apigw = None
+if WS_ENDPOINT:
+    try:
+        apigw = boto3.client("apigatewaymanagementapi", endpoint_url=WS_ENDPOINT)
+    except Exception as e:
+        print(f"Error inicializando API Gateway Management API: {e}")
 
 def _post_to_connection(connection_id: str, payload: dict) -> None:
+    if not apigw:
+        print("WS_ENDPOINT no configurado, no se puede enviar mensaje WebSocket")
+        return
+    
     data_bytes = json.dumps(payload).encode("utf-8")
     try:
         apigw.post_to_connection(ConnectionId=connection_id, Data=data_bytes)
