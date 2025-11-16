@@ -3,6 +3,7 @@ import boto3
 import uuid
 import traceback
 from datetime import datetime
+from common.websocket import notify_incident_created
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("Incidentes")   # TABLA REAL
@@ -47,6 +48,9 @@ def handler(event, context):
         }
 
         table.put_item(Item=item)
+
+        # Enviar notificación WebSocket
+        notify_incident_created(item)
 
         return response(201, {"message": "Incidente creado", "data": item})
 
