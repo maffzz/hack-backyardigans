@@ -230,6 +230,20 @@
               "raw": "{\n  \"edificio\": \"Edificio 1\",\n  \"piso\": 3,\n  \"urgencia\": \"ALTA\",\n  \"hora\": 14,\n  \"dia_semana\": 0\n}"
             }
           }
+        },
+        {
+          "name": "Suggest Department (Staff/Admin -> SageMaker HuggingFace)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "{{token_staff}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/staff/incidents/{{incident_id}}/suggest-department",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff", "incidents", "{{incident_id}}", "suggest-department"]
+            }
+          }
         }
       ]
     }
