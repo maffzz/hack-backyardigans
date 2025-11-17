@@ -17,6 +17,14 @@ def handler(event, context):
             'Content-Type': 'application/json'
         }
 
+        # Manejar preflight OPTIONS para CORS (no requiere token)
+        if event.get('httpMethod') == 'OPTIONS':
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'message': 'OK'})
+            }
+
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
         

@@ -4,9 +4,13 @@ import boto3
 def authorize(event):
     headers = event.get("headers", {})
     token = headers.get("Authorization") or headers.get("authorization")
-    
+
     if not token:
         return None
+
+    # Permitir formato "Bearer <token>" desde frontend
+    if isinstance(token, str) and token.lower().startswith("bearer "):
+        token = token.split(" ", 1)[1]
     
     lambda_client = boto3.client("lambda")
     response = lambda_client.invoke(
