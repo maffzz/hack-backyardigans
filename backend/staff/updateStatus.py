@@ -12,12 +12,18 @@ events_table = dynamodb.Table("IncidenteEventos")
 
 def handler(event, context):
     try:
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json'
+        }
+
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
         
         if not incident_id:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({
                     'error': 'ID de incidente requerido'
                 })
@@ -30,6 +36,7 @@ def handler(event, context):
             except:
                 return {
                     'statusCode': 400,
+                    'headers': headers,
                     'body': json.dumps({
                         'error': 'Body JSON inválido'
                     })
@@ -39,6 +46,7 @@ def handler(event, context):
         if not new_status:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({
                     'error': "El campo 'estado' es requerido"
                 })
@@ -48,6 +56,7 @@ def handler(event, context):
         if new_status not in valid_statuses:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({
                     'error': f"Estado inválido. Valores válidos: {', '.join(valid_statuses)}"
                 })
@@ -57,6 +66,7 @@ def handler(event, context):
         if not user:
             return {
                 'statusCode': 403,
+                'headers': headers,
                 'body': json.dumps({
                     'error': 'Token inválido'
                 })
@@ -65,6 +75,7 @@ def handler(event, context):
         if user["role"] not in ["staff", "admin"]:
             return {
                 'statusCode': 403,
+                'headers': headers,
                 'body': json.dumps({
                     'error': 'Solo staff o admin pueden actualizar estados'
                 })
@@ -77,6 +88,7 @@ def handler(event, context):
         if not incident:
             return {
                 'statusCode': 404,
+                'headers': headers,
                 'body': json.dumps({
                     'error': 'Incidente no encontrado'
                 })
@@ -89,6 +101,7 @@ def handler(event, context):
         except Exception as e:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({
                     'error': str(e)
                 })
@@ -125,6 +138,7 @@ def handler(event, context):
         
         return {
             'statusCode': 200,
+            'headers': headers,
             'body': json.dumps({
                 'message': 'Estado actualizado',
                 'data': {
@@ -139,6 +153,10 @@ def handler(event, context):
         traceback.print_exc()
         return {
             'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json'
+            },
             'body': json.dumps({
                 'error': str(e)
             })
