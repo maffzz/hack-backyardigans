@@ -1,0 +1,376 @@
+{
+  "info": {
+    "name": "Alertautec Backend",
+    "_postman_id": "a5bdc6ec-0000-4000-9000-ml-demo-123456",
+    "description": "Colección para probar el backend de Alertautec con roles Student / Staff / Admin, incidentes, reportes y ML.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Register - Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"student001\",\n  \"password\": \"pass123\",\n  \"role\": \"student\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register - Staff",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"staff001\",\n  \"password\": \"pass123\",\n  \"role\": \"staff\",\n  \"department\": \"MANTENIMIENTO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register - Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"admin001\",\n  \"password\": \"pass123\",\n  \"role\": \"admin\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - Student (Get Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"student001\",\n  \"password\": \"pass123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let data = pm.response.json();",
+                  "if (data.token) {",
+                  "  pm.collectionVariables.set('token_student', data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Staff (Get Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"staff001\",\n  \"password\": \"pass123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let data = pm.response.json();",
+                  "if (data.token) {",
+                  "  pm.collectionVariables.set('token_staff', data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Admin (Get Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"admin001\",\n  \"password\": \"pass123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let data = pm.response.json();",
+                  "if (data.token) {",
+                  "  pm.collectionVariables.set('token_admin', data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Student",
+      "item": [
+        {
+          "name": "Create Incident",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token_student}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/student/incidents",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "incidents"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"MANTENIMIENTO\",\n  \"descripcion\": \"Fuga de agua en el baño del 2do piso\",\n  \"ubicacion\": {\n    \"edificio\": \"Edificio 1\",\n    \"piso\": 2,\n    \"aula\": \"B201\"\n  },\n  \"urgencia\": \"ALTA\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let data = pm.response.json();",
+                  "if (data.incident && data.incident.incident_id) {",
+                  "  pm.collectionVariables.set('incident_id', data.incident.incident_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List My Incidents",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "{{token_student}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/student/incidents/mine",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "incidents", "mine"]
+            }
+          }
+        },
+        {
+          "name": "List All Incidents (public dashboard)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/student/incidents",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "incidents"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Staff/Admin - Incidents",
+      "item": [
+        {
+          "name": "List Incidents For Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token_staff}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/staff/incidents/by-department",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff", "incidents", "by-department"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"departamento\": \"MANTENIMIENTO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Assign Department (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token_admin}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/staff/incidents/{{incident_id}}/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff", "incidents", "{{incident_id}}", "assign"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"departamento\": \"MANTENIMIENTO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Status (Staff/Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token_staff}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/staff/incidents/{{incident_id}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff", "incidents", "{{incident_id}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nuevo_estado\": \"RESUELTO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Comment (Staff)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token_staff}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/staff/incidents/{{incident_id}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff", "incidents", "{{incident_id}}", "comments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comentario\": \"Estamos enviando personal de mantenimiento.\",\n  \"privado\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Incident Events (Staff/Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "{{token_staff}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/staff/incidents/{{incident_id}}/events?limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff", "incidents", "{{incident_id}}", "events"],
+              "query": [
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - ML & Notificaciones",
+      "item": [
+        {
+          "name": "Predict Risk (Staff/Admin -> SageMaker)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token_staff}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/staff/incidents/predict-risk",
+              "host": ["{{baseUrl}}"],
+              "path": ["staff", "incidents", "predict-risk"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"edificio\": \"Edificio 1\",\n  \"piso\": 3,\n  \"urgencia\": \"ALTA\",\n  \"hora\": 14,\n  \"dia_semana\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "Test Urgent Incident (Create + triggers notifyUrgentIncident)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token_student}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/student/incidents",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "incidents"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"EMERGENCIA\",\n  \"descripcion\": \"Estudiante se cayó por las escaleras\",\n  \"ubicacion\": {\n    \"edificio\": \"Edificio 1\",\n    \"piso\": 1,\n    \"aula\": \"Escaleras principales\"\n  },\n  \"urgencia\": \"ALTA\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "https://<tu-api-gateway-url>" },
+    { "key": "token_student", "value": "" },
+    { "key": "token_staff", "value": "" },
+    { "key": "token_admin", "value": "" },
+    { "key": "incident_id", "value": "" }
+  ]
+}
