@@ -15,6 +15,7 @@ provider:
     S3_BUCKET: ${self:service}-attachments-${self:provider.stage}
     REPORTS_BUCKET: ${self:service}-reportes-${self:provider.stage}
     RISK_MODEL_ENDPOINT: alertautec-risk-model
+    SUGGEST_DEPT_ENDPOINT: alertautec-suggest-department
     SNS_TOPIC_ARN: !Ref IncidentNotificationsTopic
 
 functions:
@@ -185,6 +186,15 @@ functions:
       - http:
           path: staff/incidents/predict-risk
           method: post
+          cors: true
+          integration: lambda-proxy
+
+  suggestDepartment:
+    handler: staff/suggestDepartment.handler
+    events:
+      - http:
+          path: staff/incidents/{id}/suggest-department
+          method: get
           cors: true
           integration: lambda-proxy
 
