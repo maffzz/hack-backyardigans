@@ -1,6 +1,13 @@
 import json
 import boto3
+from decimal import Decimal
 from common import authorize
+
+# Helper to convert Decimal to native Python types
+def decimal_default(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('Incidentes')
@@ -47,10 +54,11 @@ def handler(event, context):
         return {
             'statusCode': 200,
             'headers': cors_headers,
-            'body': json.dumps({'data': response['Item']}, default=str)
+            'body': json.dumps({'data': response['Item']}, default=decimal_default)
         }
         
     except Exception as e:
+        print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
             'headers': cors_headers,
