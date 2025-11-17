@@ -11,13 +11,49 @@ table = dynamodb.Table("Incidentes")
 events_table = dynamodb.Table("IncidenteEventos")
 
 def handler(event, context):
+    # ========== CORS HEADERS - CRÍTICO ==========
+    cors_headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Access-Control-Allow-Methods': 'PUT,OPTIONS'
+    }
+    
+    # ========== HANDLE OPTIONS (PREFLIGHT) - DEBE IR PRIMERO ==========
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': cors_headers,
+            'body': json.dumps({'message': 'OK'})
+        }
+    
     try:
+        # Autorizar DESPUÉS del OPTIONS
+        user = authorize(event)
+        if not user:
+            return {
+                'statusCode': 403,
+                'headers': cors_headers,  # ← IMPORTANTE: CORS en todos los responses
+                'body': json.dumps({
+                    'error': 'Token inválido'
+                })
+            }
+        
+        if user["role"] not in ["staff", "admin"]:
+            return {
+                'statusCode': 403,
+                'headers': cors_headers,
+                'body': json.dumps({
+                    'error': 'Solo staff o admin pueden actualizar estados'
+                })
+            }
+        
         path_params = event.get("pathParameters") or {}
         incident_id = path_params.get("id")
         
         if not incident_id:
             return {
                 'statusCode': 400,
+                'headers': cors_headers,
                 'body': json.dumps({
                     'error': 'ID de incidente requerido'
                 })
@@ -30,6 +66,7 @@ def handler(event, context):
             except:
                 return {
                     'statusCode': 400,
+                    'headers': cors_headers,
                     'body': json.dumps({
                         'error': 'Body JSON inválido'
                     })
@@ -39,6 +76,7 @@ def handler(event, context):
         if not new_status:
             return {
                 'statusCode': 400,
+                'headers': cors_headers,
                 'body': json.dumps({
                     'error': "El campo 'estado' es requerido"
                 })
@@ -48,25 +86,9 @@ def handler(event, context):
         if new_status not in valid_statuses:
             return {
                 'statusCode': 400,
+                'headers': cors_headers,
                 'body': json.dumps({
                     'error': f"Estado inválido. Valores válidos: {', '.join(valid_statuses)}"
-                })
-            }
-        
-        user = authorize(event)
-        if not user:
-            return {
-                'statusCode': 403,
-                'body': json.dumps({
-                    'error': 'Token inválido'
-                })
-            }
-        
-        if user["role"] not in ["staff", "admin"]:
-            return {
-                'statusCode': 403,
-                'body': json.dumps({
-                    'error': 'Solo staff o admin pueden actualizar estados'
                 })
             }
         
@@ -77,6 +99,7 @@ def handler(event, context):
         if not incident:
             return {
                 'statusCode': 404,
+                'headers': cors_headers,
                 'body': json.dumps({
                     'error': 'Incidente no encontrado'
                 })
@@ -89,6 +112,7 @@ def handler(event, context):
         except Exception as e:
             return {
                 'statusCode': 400,
+                'headers': cors_headers,
                 'body': json.dumps({
                     'error': str(e)
                 })
@@ -125,6 +149,7 @@ def handler(event, context):
         
         return {
             'statusCode': 200,
+            'headers': cors_headers,  # ← IMPORTANTE: CORS en success response
             'body': json.dumps({
                 'message': 'Estado actualizado',
                 'data': {
@@ -139,6 +164,7 @@ def handler(event, context):
         traceback.print_exc()
         return {
             'statusCode': 500,
+            'headers': cors_headers,  # ← IMPORTANTE: CORS en error response
             'body': json.dumps({
                 'error': str(e)
             })
